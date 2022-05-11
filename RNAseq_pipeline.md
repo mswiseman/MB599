@@ -46,7 +46,7 @@ mkdir ./multQC
 ```
 
 ## Removal of adaptors
-cleaning.sh can be found [here](scripts/cleaning.sh)
+cleaning.sh can be found [here](scripts/cleaning.sh). Be sure to change the adaptors to match the ones used for your sequencing run. 
 
 ```shell
 #code for script can be found in scripts folder
@@ -85,6 +85,7 @@ grep -v "gene" combinedGeneModels.tenScaffolds.repeatFiltered.gff > combinedGene
 gffread combinedGeneModels.tenScaffolds.repeatFiltered.gff -T -o combinedGeneModels.tenScaffolds.repeatFiltered.gtf
 ```
 ## Mapping
+mapping.sh can be found [here](scripts/mapping.sh). 
 
 ```shell
 #code for script can be found in scripts folder
@@ -134,9 +135,10 @@ less -S gene_count_matrix.csv
 less -S transcript_count_matrix.csv
 ```
 ## Running salmon
+salmon.sh can be found [here](scripts/salmon.sh). 
 ```shell
 #script can be found in scripts folder
-chmod +x salmon.sh
+chmod +x salmon
 bash salmon.sh
 ```
 
