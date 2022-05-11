@@ -124,12 +124,13 @@ write.table(normalized_counts, file="normalized_counts.txt", sep="\t", quote=F, 
 
 #NOTE: DESeq2 doesn’t actually use normalized counts, rather it uses the raw counts and models the normalization inside the Generalized Linear Model (GLM). These normalized counts will be useful for downstream visualization of results, but cannot be used as input to DESeq2 or any other tools that perform differential expression analysis which use the negative binomial model.
 
-## Plot dispersion estimates
+# Plot dispersion estimates
 plotDispEsts(dds)
 
 ```
+# Examining dds results (as dds object)
 
-```{r printing deseq results, still as dds object}
+```r
 
 #lets just compare nugget and symphony
 contrast_genotypes <- c("genotype", "Nugget", "Symphony")
@@ -147,7 +148,10 @@ plotMA(res005_time, ylim=c(-2,2))
  
 ```
 
-```{r convert to df}
+# Examining dds results (as df)
+
+
+```r 
 #order by pvalue, genotype
 resOrdered <- as.data.frame(res005_genotypes)
 
@@ -188,8 +192,9 @@ write.csv(resOrdered_pval_cutoff, "Nugget_vs_Sym_results_with_Kegg_path_and_goTe
 
 ```
 
+# Transformation of counts
 
-```{r transformation of counts}
+```r 
 #transform data
 vsd <- vst(dds, blind=FALSE)
 rld <- rlog(dds, blind=FALSE)
@@ -205,7 +210,7 @@ rownames(mat) <- colnames(mat) <- with(colData(dds), paste(genotype, time, sep="
 
 # PCA plots
 
-```{r PCA Plots}
+```r
 rv <- rowVars(assay(rld))
 select <- order(rv, decreasing=T)[seq_len(min(500,length(rv)))]
 pc <- prcomp(t(assay(vsd)[select,]))
@@ -280,7 +285,9 @@ fviz_pca_ind(pca,
              )
 ```
 
-```{r heat maps}
+# Heat maps
+
+```r
 #correlation matrix for heat map
 rld_cor<-cor(rld_mat)
 
@@ -290,26 +297,6 @@ pheatmap(rld_cor, border_color=NA, fontsize = 10,
 
 #scree plot
 fviz_eig(pca) 
-
-```
-
-
-
-# Another form of heatmap
-
-```{r}
-topGene <- resOrdered$UNIProt_ID[which.min(resOrdered$padj)]
-View(topGene)
-res
-
-plotMA(resOrdered, ylim=c(-5,5)) 
-
-with(resOrdered[topGene, ], {
-  points(baseMean, log2FoldChange, col="dodgerblue", cex=2, lwd=2)
-  text(baseMean, log2FoldChange, topGene, pos=2, col="dodgerblue")
-})
-
-plotDispEsts(dds)
 
 #showing p-value across all genes
 hist(res005_genotypes$padj, breaks=20, col="grey50", border="white")
@@ -321,6 +308,9 @@ hist(resSig$padj, breaks=20, col="grey50", border="white")
 hist(res005_genotypes$padj[res005_genotypes$baseMean > 10], breaks=20, col="grey50", border="white")
 hist(resSig$padj[resSig$baseMean > 10], breaks=20, col="grey50", border="white")
 
+topGene <- resOrdered$UNIProt_ID[which.min(resOrdered$padj)]
+
+#prepping another heatmap
 colors <- colorRampPalette( rev(brewer.pal(9, "PuOr")) )(255)
 sidecols <- c("grey","dodgerblue")[ rld$col.names ]
 topVarGenes <- head(order(-rowVars(assay(rld))),35)
@@ -329,24 +319,4 @@ mat <- mat - rowMeans(mat)
 colnames(mat) <- paste0(rld$genotype,"-",rld$time)
 heatmap.2(mat, trace="none", col=colors, ColSideColors=sidecols,
           labRow=FALSE, mar=c(10,2), scale="row")
-
-
-```
-
-# Reduced model (trying to remove effect of genotype). 
-
-```{r}
-ddsLRT <- DESeq(dds, test="LRT", reduced = ~ genotype + time)
-resLRT <- results(ddsLRT)
-resLRT$symbol <- mcols(ddsLRT)$symbol
-head(resLRT[order(resLRT$pvalue),],4)
-
-#show most differentially expressed gene over time
-data <- plotCounts(ddsLRT, which.min(resLRT$pvalue), 
-                   intgroup=c("time","genotype"), returnData=TRUE)
-
-View(data)
-ggplot(data, aes(x=time, y=count, color=genotype, group=genotype)) + 
-  geom_point() + stat_smooth(se=FALSE,method="loess") +  scale_y_log10()
-
 ```
