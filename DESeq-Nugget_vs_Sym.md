@@ -4,7 +4,7 @@ author: "Michele Wiseman"
 date: "May 11th, 2022"
 ---
 
-# Nugget vs Sym
+# Nugget vs Symphony
 
 ```{r load packages, message=FALSE, warning=FALSE, include=FALSE}
 #BiocManager::install('apeglm')
@@ -30,10 +30,10 @@ library(ggpubr)
 ```
 
 
+# Loading data
+```r 
 
-```{r loading data}
-
-#load count data into R. We have to skipa annotation columns for now since this needs to be a matrix.
+#load count data into R. We have to skip annotation columns for now since this needs to be a matrix.
 countData_NugSym <- read_excel("Desktop/NEWVERSION_dovetailAssemblyFullNonRepeatAssociatedGeneList.xlsx", 
                         col_types = c("text", "skip", "skip", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "skip", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "skip", "numeric"))
 
@@ -53,9 +53,10 @@ row.names(countData2_NugSym_mtx) <- GeneID
 ```
 
 # Some data visualization 
-## Check raw reads for trends
+* Check raw reads for trends
+* First pre-processing visuals
 
-```{r pre-processing visuals}
+```r
 row.names(countData_NugSym) <- GeneID   
 countData_NugSym = data.frame(countData_NugSym)
 countData_NugSym <- countData_NugSym[,-1]
@@ -80,9 +81,9 @@ plot(logcountdata[,1], logcountdata[,12])
 
 ```
 
-# Back to DESeq prep
+# DESeq prep
 
-```{r deseq setup}
+```r
 
 #will need this later
 Samples <- c(" 01t00p1Nug"," 02t00p2Nug"," 03t00p3Nug"," 04t00p4Nug", " 05t00p1Sym", " 06t00p2Sym","07t00p3Sym","09t12p1Nug","10t12p2Nug","11t12p3Nug","12t12p1Sym","13t12p2Sym","14t12p3Sym","15t12p4Sym","16t24p1Nug","17t24p2Nug","18t24p3Nug","19t24p4Nug","20t24p1Sym","21t24p2Sym","22t24p3Sym","23t24p4Sym","24t48p1Nug","25t48p2Nug","26t48p3Nug","27t48p4Nug","28t48p1Sym","29t48p2Sym","30t48p3Sym","31t48p4Sym","32t72p1Nug","33t72p2Nug","34t72p3Nug","35t72p4Nug","36t72p1Sym","37t72p2Sym","39t72p4Sym") 
@@ -99,8 +100,8 @@ dds <- DESeqDataSetFromMatrix(countData = countData2_NugSym_mtx, colData = colDa
 dds <-dds[ rowSums(counts(dds)) > 10, ]
 
 ```
-
-```{r running deseq}
+# Running DESeq
+```r 
 
 #run DESeq... this performs the median of ratios normalization method
 dds <- DESeq(dds)
