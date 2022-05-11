@@ -16,3 +16,14 @@ Date: "May 2022"
 
 # General set-up
 The entirety of this pipeline will be done using the [CQLS Cybercomputing infastructure](https://cqls.oregonstate.edu/). For sake of security, I have excluded specific commands of logging in and/or submitting jobs to our cluster; however, hopefully you will find this code to be useful and largely reproducible. 
+
+```shell
+#in <project> directory, have subdirectories:
+
+mkdir aligned
+mkdir cleaned
+mkdir rawReads
+mkdir reference
+mkdir trx
+mkdir denovo
+```
