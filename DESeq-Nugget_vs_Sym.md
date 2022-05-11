@@ -1,13 +1,18 @@
 ---
 title: "Nugget vs Sym"
-author: "Michele Wiseman"
-date: "May 11th, 2022"
+author: "Michele Wiseman, Jenny Hesser, Riely White, Sophie Baur"
+date: "May 2022"
 ---
 
-# Nugget vs Symphony
+For RNAseq pipeline, please refer to [here](RNAseq_pipeline.md). 
+
+# First, let's look at Nugget vs. Symphony
 
 ```{r load packages, message=FALSE, warning=FALSE, include=FALSE}
+#Remember you can install packages from cran using install.packages("packagename")
+#For Bioc packages, it's a little different
 #BiocManager::install('apeglm')
+
 library(PCAtools)
 library(genefilter)
 library(pheatmap)
