@@ -102,7 +102,7 @@ cat mapping_genome.txt
 #can export and visualize in R
 ```
 
-## to merge transcripts
+## To merge transcripts
 ```shell
 #this takes a list of gtf files [gtf_list] and constructs a gtf file of merged reads into transcripts
 stringtie --merge -G ../../reference/combinedGeneModels.tenScaffolds.repeatFiltered.gtf -o stringtie_merged.gtf gtf_list.txt
