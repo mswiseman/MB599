@@ -184,7 +184,7 @@ Plot.MappingTrx<-ggplot(mapping.trx , aes(x=V1, y = as.numeric(sub("% %", "", pe
   xlab("Sample") + ylim(c(0,100))+ scale_fill_manual(values=c("black","orange"))+
   theme(legend.title=element_blank())
 
-![Plot.MappingTrx](images/Plot.MappingTrx.jpgs)
+![Plot.MappingTrx](images/Plot_MappingTrx.jpg)
 ```
 
 ```shell
