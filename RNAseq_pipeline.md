@@ -46,6 +46,7 @@ mkdir ./multQC
 ```
 
 ## Removal of adaptors
+cleaning.sh can be found [here](scripts/cleaning.sh)
 
 ```shell
 #code for script can be found in scripts folder
