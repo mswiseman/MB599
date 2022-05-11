@@ -52,4 +52,21 @@ mkdir ./multQC
 chmod +x cleaning.sh
 bash cleaning.sh
 ```
+## Download reference genome and annotation files
 
+```shell
+#note: some of the necessary files werent on hopbase as of 5/11/22, so I requested them from Dr. Henning and used CyberDuck to put them in our reference folder. 
+
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/assemblyData/dovetailCascade10ScaffoldsMasked.fasta.gz" -O dovetailCascade10ScaffoldsMasked.fasta.gz #masked version
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/assemblyData/dovetailCascade10ScaffoldsUnmasked.fasta.gz" -O dovetailCascade10ScaffoldsUnmasked.fasta.gz #unmasked
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/geneData/combinedGeneModels/combinedGeneModels.tenScaffolds.pep.fasta.gz" -O combinedGeneModels.tenScaffolds.pep.fasta.gz
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/geneData/combinedGeneModels/combinedGeneModels.txt" -O combinedGeneModels.txt
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/repeatData/compiledRepeats.gff.gz" -O compiledRepeats.gff.gz
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/geneData/maker/makerGenes.gff3.gz" -O makerGenes.gff3.gz
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/geneData/transdecoder/completeTransdecoderGeneModels/transdecoder.tenScaffolds.cds.fasta.gz" -O transdecoder.tenScaffolds.cds.fasta.gz
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/geneData/transdecoder/completeTransdecoderGeneModels/transdecoder.tenScaffolds.pep.fasta.gz" -O transdecoder.tenScaffolds.pep.fasta.gz
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/geneData/transdecoder/transdecoderOutput/transcripts.fasta.transdecoder.genomeCentric.gff3.gz" -O transcripts.fasta.transdecoder.genomeCentric.gff3.gz
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/geneData/maker/all.maker.proteins.fasta.gz" -O all.maker.proteins.fasta.gz
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/geneData/maker/all.maker.transcripts.fasta.gz" -O all.maker.transcripts.fasta.gz
+wget "http://hopbase.cqls.oregonstate.edu/content/cascadeDovetail/geneData/maker/all.maker.cds.fasta.gz" -O all.maker.cds.fasta.gz
+```
