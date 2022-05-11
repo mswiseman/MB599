@@ -13,3 +13,6 @@ Date: "May 2022"
 * [samtools](http://www.htslib.org/doc/samtools-1.2.html)
 * [stringtie](http://ccb.jhu.edu/software/stringtie/index.shtml?t=manual)
 * [salmon](https://salmon.readthedocs.io/en/latest/salmon.html)
+
+# General set-up
+The entirety of this pipeline will be done using the [CQLS Cybercomputing infastructure](https://cqls.oregonstate.edu/). For sake of security, I have excluded specific commands of logging in and/or submitting jobs to our cluster; however, hopefully you will find this code to be useful and largely reproducible. 
