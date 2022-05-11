@@ -1,8 +1,10 @@
 ---
 Title: "RNAseq Pipeline"
-Author: "Michele Wiseman"
+Authors: "Michele Wiseman, Jenny Hesser, Riely White, Sophie Baur"
 Date: "May 2022"
 ---
+# Acknowledgements
+A starting point for much of the code included here was provided by Renee Erikssen and Andrew Black (as part of the [CQLS RNAseq course](https://cqls.oregonstate.edu/training/workshops)). Thank you both for your help.
 
 # Programs used:
 
