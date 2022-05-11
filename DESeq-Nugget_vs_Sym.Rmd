@@ -4,7 +4,7 @@ author: "Michele Wiseman"
 date: "May 11th, 2022"
 ---
 
-#Nugget vs Sym
+**Nugget vs Sym**
 
 ```{r load packages, message=FALSE, warning=FALSE, include=FALSE}
 #BiocManager::install('apeglm')
