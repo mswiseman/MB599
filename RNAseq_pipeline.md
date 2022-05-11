@@ -19,7 +19,7 @@ A starting point for much of the code included here was provided by Renee Erikss
 # General set-up
 The entirety of this pipeline will be done using the [CQLS Cybercomputing infastructure](https://cqls.oregonstate.edu/). For sake of security, I have excluded specific commands of logging in and/or submitting jobs to our cluster; however, hopefully you will find this code to be useful and largely reproducible. 
 
-## Pre-processing and QC
+## QC
 
 ```shell
 #in <project> directory, have subdirectories:
@@ -35,8 +35,6 @@ mkdir denovo
 gunzip *.gz
 
 #checking quality of FASTQ files using fastqc
-
-
 #in ~/<project>/rawReads 
 mkdir fastqc_results
 
@@ -46,3 +44,12 @@ fastqc *.fastq -o ./fastqc_results
 #in ~/<project>/raw/fastqc_results/
 mkdir ./multQC 
 ```
+
+## Removal of adaptors
+
+```shell
+#code for script can be found in scripts folder
+chmod +x cleaning.sh
+bash cleaning.sh
+```
+
