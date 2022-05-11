@@ -163,8 +163,22 @@ cat mapping_trx.txt
 #tidy up space
 rm -f names rate group
 ```
+## Visualizing mapping rate in R
+```r
+mapping.trx <- read.delim("mapping_trx.txt",header=F)
 
+mapping.trx$V1<-factor(mapping.trx$V1, levels = mapping.trx$V1[order(mapping.trx$V2)])
 
+Plot.MappingTrx<-ggplot(mapping.trx , aes(x=V1, y = V3,fill=V2)) + 
+geom_bar(stat = "identity") + 
+theme_bw() + 
+theme(axis.text.x = element_text(angle = 90)) + 
+ylab("Salmon Mapping Rate %") + 
+xlab("Sample") + ylim(c(0,100))+ scale_fill_manual(values=c("black","orange"))+
+theme(legend.title=element_blank())
+
+Plot.MappingTrx
+```
 
 
 
