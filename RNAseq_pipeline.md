@@ -180,6 +180,34 @@ theme(legend.title=element_blank())
 Plot.MappingTrx
 ```
 
+```shell
+#in reference folder, grep gene identifiers
+grep ">" combinedGeneModels.tenScaffolds.repeatFiltered.cds.fasta > ../trx/trans
 
+#move to trx folder
+sed 's/>//g' trans > tx2gene.txt
 
+#move tx2gene.txt and all directories of salmon output to personal computer
+```
+**Before I did anything in R studio, I went ahead and manually edited the names of the files so they would be in order (eg. I edited the first two numbers of each file).**
 
+## Prepping for DEseq
+```r
+#in Rstudio
+samples.trx <-read.table("samples.txt", header = TRUE)
+tx2gene <-read.table("tx2gene.txt", header = FALSE)
+
+#set up metadata dataframe
+genotype=as.factor(c(rep("Nugget", 4), rep("Symphony",4), rep("Nugget", 3), rep("Symphony", 4), rep("Nugget", 4), rep("Symphony", 4), rep("Nugget", 4), rep("Symphony", 4), rep("Nugget", 4), rep("Symphony", 4)))
+time=as.factor(c(rep("0hr", 8), rep("12hr", 7), rep("24hr", 8), rep("48hr", 8), rep("72hr", 8)))
+colData = data.frame(col.names = c(" 01t00p1Nug"," 02t00p2Nug"," 03t00p3Nug"," 04t00p4Nug", " 05t00p1Sym", "06t00p2Sym","07t00p3Sym","08t00p4Sym","09t12p1Nug","10t12p2Nug","11t12p3Nug","12t12p1Sym","13t12p2Sym","14t12p3Sym","15t12p4Sym","16t24p1Nug","17t24p2Nug","18t24p3Nug","19t24p4Nug","20t24p1Sym","21t24p2Sym","22t24p3Sym","23t24p4Sym","24t48p1Nug","25t48p2Nug","26t48p3Nug","27t48p4Nug","28t48p1Sym","29t48p2Sym","30t48p3Sym","31t48p4Sym","32t72p1Nug","33t72p2Nug","34t72p3Nug","35t72p4Nug","36t72p1Sym","37t72p2Sym","38t72p3Sym","39t72p4Sym"), genotype, time)
+
+#associate sample names with path to each quantification file (quant.sf)
+files <- file.path("quant", samples.trx$samples, "quant.sf")
+
+#add generic rownames
+rownames<-read.table("quant/rownames.txt",header=FALSE)
+names(files)<- paste0(rownames$V1)
+```
+
+We are now ready for the DESeq portion of the pipeline. See the [DESeq](DESeq-Nugget_vs_Sym.md) gitpage for details. 
