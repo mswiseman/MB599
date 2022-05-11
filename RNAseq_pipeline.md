@@ -168,19 +168,23 @@ rm -f names rate group
 ```
 ## Visualizing mapping rate in R
 ```r
-mapping.trx <- read.delim("mapping_trx.txt",header=F)
+mapping.trx <- read.delim("Downloads/mapping_trx.txt",header=F)
+
+#need to get rid of %... this is a rather inelegant way, but it works. 
+percent_vec = paste(mapping.trx$V2, "%")
+as.numeric(sub("% %", "", percent_vec))
 
 mapping.trx$V1<-factor(mapping.trx$V1, levels = mapping.trx$V1[order(mapping.trx$V2)])
 
-Plot.MappingTrx<-ggplot(mapping.trx , aes(x=V1, y = V3,fill=V2)) + 
-geom_bar(stat = "identity") + 
-theme_bw() + 
-theme(axis.text.x = element_text(angle = 90)) + 
-ylab("Salmon Mapping Rate %") + 
-xlab("Sample") + ylim(c(0,100))+ scale_fill_manual(values=c("black","orange"))+
-theme(legend.title=element_blank())
+Plot.MappingTrx<-ggplot(mapping.trx , aes(x=V1, y = as.numeric(sub("% %", "", percent_vec)), fill=V3)) + 
+  geom_bar(stat = "identity") + 
+  theme_bw() + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  ylab("Salmon Mapping Rate %") + 
+  xlab("Sample") + ylim(c(0,100))+ scale_fill_manual(values=c("black","orange"))+
+  theme(legend.title=element_blank())
 
-Plot.MappingTrx
+![Plot.MappingTrx](images/Plot.MappingTrx.jpgs)
 ```
 
 ```shell
