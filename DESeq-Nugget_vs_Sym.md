@@ -315,6 +315,8 @@ fviz_pca_var(pca,
 ```
 ![pca2](images/pca2.png)
 
+This plot isn't super informative because we just have too many differentially expressed genes.
+
 ```r
 #biplot
 fviz_pca_biplot(pca, repel = TRUE,
@@ -323,6 +325,7 @@ fviz_pca_biplot(pca, repel = TRUE,
                 )
 ```
 ![biplot](images/biplot.png)
+Once again, the biplot is a bit too busy. 
 
 
 ```r
@@ -350,7 +353,10 @@ fviz_pca_ind(pca,
              )
 ```
 ![pca3](images/pca3.png)
+We can see that, regardless of genotype, the samples group together by time: either time 0 or not time 0. 
+
 ![pca3](images/pca4.png)
+Because the difference in gene expression is so large when examining time, it seems our genotype PCA doesn't capture all of the samples in each respective genotype. In this case, it might be better to just look at differences between genotypes at a certain time grouping (either time zero or not time zero). 
 
 # Scree plot
 A scree plot is a graphical tool used in the selection of the number of relevant components or factors to be considered in a principal components analysis or a factor analysis. The
@@ -416,4 +422,4 @@ ggvenn(vennDat, set_name_size = 3)
 ```
 ![venn](venn.png)
 
-It looks like we see the most differences when looking at differences in time (specifically time 0 and time 72), regardless of genotype. 
+It looks like we see the most differences when looking at differences in time (specifically time 0 and time 72), regardless of genotype. This agrees with the PCA plots we looked at above.
