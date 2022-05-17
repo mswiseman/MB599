@@ -99,7 +99,7 @@ plot(logcountdata[,1], logcountdata[,2])
 plot(logcountdata[,1], logcountdata[,12])
 
 ```
-![corr2](image/corr2.png)
+![corr2](images/corr2.png)
 
 # DESeq prep
 
@@ -148,6 +148,8 @@ write.table(normalized_counts, file="normalized_counts.txt", sep="\t", quote=F, 
 plotDispEsts(dds)
 
 ```
+![dispest](images/dispest.png)
+
 # Examining dds results (as dds object)
 
 ```r
