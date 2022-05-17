@@ -71,20 +71,35 @@ countData_NugSym <- countData_NugSym[,-1]
 par(mar=c(8,4,4,1)+0.1)
 barplot(colSums(countData_NugSym)/1e6, las =3)
 
+```
+![rawbarchart](images/raw_bar_chart.png)
+
+```r
 #clearly need to transform
 hist(countData_NugSym$X01t00p1Nug, br=100)
 
+```
+![rawbarchart2](images/raw_bar_chart2.png)
+
+```r
 #log transformation seems to normalize it pretty well 
 logcountdata = log2(1+countData_NugSym)
 hist(logcountdata$X01t00p1Nug, br=100)
+```
+![logtrans](images/log_barchart.png)
 
+```r
 #pretty strongly correlated within nugget uninoculated treatments
 plot(logcountdata[,1], logcountdata[,2])
+```
+![corr1](images/corr1.png)
 
+```r
 #A lot more differences between treatments (less correlation)
 plot(logcountdata[,1], logcountdata[,12])
 
 ```
+![corr2](image/corr2.png)
 
 # DESeq prep
 
