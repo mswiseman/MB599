@@ -169,9 +169,13 @@ plotMA(res005_genotypes, ylim=c(-2,2))
 plotMA(res005_time, ylim=c(-2,2))
  
 ```
+**Genotypes**
+![genotypes_MA](images/genotypes_MA.png)
+
+**Time**
+![time_MA](images/time_MA.png)
 
 # Examining dds results (as df)
-
 
 ```r 
 #order by pvalue, genotype
@@ -213,6 +217,9 @@ resSig<-resSig %>%
 write.csv(resOrdered_pval_cutoff, "Nugget_vs_Sym_results_with_Kegg_path_and_goTermsMolecular.csv")
 
 ```
+[Downregulated genes (LFC =< 1)](https://biit.cs.ut.ee/gplink/l/aAlxOCt1Tx)
+[Upregulated genes (LFC >= 1)](https://biit.cs.ut.ee/gplink/l/i2Vgb-CyT6)
+
 
 # Transformation of counts
 
