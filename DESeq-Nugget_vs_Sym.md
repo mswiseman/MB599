@@ -428,6 +428,6 @@ vennDat <- tibble(geneID=rownames(results.interaction.0v72)) %>%
 
 ggvenn(vennDat, set_name_size = 3)
 ```
-![venn](venn.png)
+![venn](images/venn.png)
 
 It looks like we see the most differences when looking at differences in time (specifically time 0 and time 72), regardless of genotype. This agrees with the PCA plots we looked at above.
