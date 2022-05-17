@@ -218,6 +218,7 @@ write.csv(resOrdered_pval_cutoff, "Nugget_vs_Sym_results_with_Kegg_path_and_goTe
 
 ```
 [Downregulated genes (LFC =< 1)](https://biit.cs.ut.ee/gplink/l/aAlxOCt1Tx)
+
 [Upregulated genes (LFC >= 1)](https://biit.cs.ut.ee/gplink/l/i2Vgb-CyT6)
 
 
@@ -225,15 +226,20 @@ write.csv(resOrdered_pval_cutoff, "Nugget_vs_Sym_results_with_Kegg_path_and_goTe
 
 ```r 
 #transform data
-vsd <- vst(dds, blind=FALSE)
+vst <- vst(dds, blind=FALSE)
 rld <- rlog(dds, blind=FALSE)
-head(assay(vsd), 3)
 
+#log transformed matrix
 distsRL <- dist(t(assay(rld)))
 mat <- as.matrix(distsRL)
 
+#vst matrix
+dist_vst <- dist(t(assay(vst)))
+mat_vst <- as.matrix(dist_vst)
+
 #rename row names with descriptive names
 rownames(mat) <- colnames(mat) <- with(colData(dds), paste(genotype, time, sep=" : "))
+rownames(mat_vst) <- colnames(mat_vst) <- with(colData(dds), paste(genotype, time, sep=" : "))
 
 ```
 
@@ -244,46 +250,46 @@ rv <- rowVars(assay(rld))
 select <- order(rv, decreasing=T)[seq_len(min(500,length(rv)))]
 pc <- prcomp(t(assay(vsd)[select,]))
 
+#just examining genotype for now
 condition <- genotype
 scores <- data.frame(pc$x, condition)
 
+#define heat map colors
 hmcol <- colorRampPalette(brewer.pal(9, "GnBu"))(100)
+
+#first way to visualize head map of log transformed data
 heatmap.2(mat, trace = "none", col = rev(hmcol), margin = c(13,13))
 
-#ggplot pcaplot
-(pcaplot <- ggplot(scores, aes(x = PC1, y = PC2, col = (factor(condition))))
-  + geom_point(size = 5)
-  + ggtitle("Principal Components")
-  + scale_colour_brewer(name = " ", palette = "Set1")
-  + theme(
-    plot.title = element_text(face = 'bold'),
-    legend.position = c(.9,.2),
-    legend.key = element_rect(fill = 'NA'),
-    legend.text = element_text(size = 10, face = "bold"),
-    axis.text.y = element_text(colour = "Black"),
-    axis.text.x = element_text(colour = "Black"),
-    axis.title.x = element_text(face = "bold"),
-    axis.title.y = element_text(face = 'bold'),
-    panel.grid.major.x = element_blank(),
-    panel.grid.major.y = element_blank(),
-    panel.grid.minor.x = element_blank(),
-    panel.grid.minor.y = element_blank(),
-    panel.background = element_rect(color = 'black',fill = NA)
-  ))
+#do we see a difference with the vst-transformed data?
+heatmap.2(mat_vst, trace = "none", col = rev(hmcol), margin = c(13,13))
+```
+It doesn't look like there's a substantial difference between the log-transformation and variability stabilizing transformation (vst) methods; however, `R` will tell you that `vst` is faster when you have a larger dataset. 
 
-#transpose and then do comphrensive PCA.
+![log_hm1](images/hm1-1.png)
+![vst_hm1](images/hm1-2.png)
+
+We can also use `pheatmap` to quickly make a heatmap of our data. 
+```r
+#summarize r-transformed data into a matrix
 rld_mat <- assay(rld)
-pca <- prcomp(t(rld_mat))
 
+#principle comp
+pca <- prcomp(t(mat))
+
+#correlation
+cor<-cor(mat)
+
+#heat map of log-transformed data
+pheatmap(cor, border_color=NA, fontsize = 10, 
+  		fontsize_row = 6, height=20)
+```
+![pheatmap1](images/pheatmap1.png)
+
+I frankly prefer pheatmap, but both are clear about communicating the differences in gene expression between genotypes. 
+
+```r
 #Make a new df that binds metadata and PCA values
 df <- cbind(colData, pca$x)
-
-#vst version
-vst_mat<-assay(vsd)
-pca <- prcomp(t(vst_mat))
-vst_cor<-cor(vst_mat)
-pheatmap(vst_cor, border_color=NA, fontsize = 10, 
-  		fontsize_row = 6, height=20)
 
 #fancy PCA by individuals
 fviz_pca_ind(pca,
@@ -291,20 +297,35 @@ fviz_pca_ind(pca,
              gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
              repel = TRUE     # Avoid text overlapping
              )
+             
+```
+![pca1](images/pca1.png)
+
+```r
 #fancy PCA by variables
 fviz_pca_var(pca,
              col.var = "contrib", # Color by contributions to the PC
              gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
              repel = TRUE     # Avoid text overlapping
              )
+```
+![pca2](images/pca2.png)
 
+```r
+#biplot
 fviz_pca_biplot(pca, repel = TRUE,
                 col.var = "#2E9FDF", # Variables color
                 col.ind = "#696969"  # Individuals color
                 )
+```
+![biplot](images/biplot.png)
 
+
+```r
+#grouping by time
 groups <- as.factor(time)
 
+#individual pca
 fviz_pca_ind(pca,
              col.ind = groups, # color by groups
              addEllipses = TRUE, # Concentration ellipses
@@ -313,19 +334,17 @@ fviz_pca_ind(pca,
              repel = TRUE
              )
 ```
+![pca3](images/pca3.png)
 
-# Heat maps
 
 ```r
-#correlation matrix for heat map
-rld_cor<-cor(rld_mat)
-
-#heat map
-pheatmap(rld_cor, border_color=NA, fontsize = 10, 
-  		fontsize_row = 6, height=20)
-
 #scree plot
 fviz_eig(pca) 
+
+```
+![scree](images/scree.png)
+
+```r
 
 #showing p-value across all genes
 hist(res005_genotypes$padj, breaks=20, col="grey50", border="white")
@@ -339,13 +358,44 @@ hist(resSig$padj[resSig$baseMean > 10], breaks=20, col="grey50", border="white")
 
 topGene <- resOrdered$UNIProt_ID[which.min(resOrdered$padj)]
 
-#prepping another heatmap
-colors <- colorRampPalette( rev(brewer.pal(9, "PuOr")) )(255)
-sidecols <- c("grey","dodgerblue")[ rld$col.names ]
-topVarGenes <- head(order(-rowVars(assay(rld))),35)
-mat <- assay(rld)[ topVarGenes, ]
-mat <- mat - rowMeans(mat)
-colnames(mat) <- paste0(rld$genotype,"-",rld$time)
-heatmap.2(mat, trace="none", col=colors, ColSideColors=sidecols,
-          labRow=FALSE, mar=c(10,2), scale="row")
 ```
+
+# Venn diagram
+
+```{r}
+results.interaction.symvnug <- results(dds, 
+                                  name="genotype_Symphony_vs_Nugget",
+                                  alpha=0.05)
+
+#convert to df
+results.interaction.symvnug<-as.data.frame(results.interaction.symvnug)
+
+#make row names a column named geneID
+results.interaction.symvnug <- tibble::rownames_to_column(results.interaction.symvnug, "geneID")
+
+#join with goterms
+results.interaction.symvnug<-  results.interaction.symvnug %>%
+  left_join(goTerms_molecular, "geneID")
+  
+  #View(results.interaction.symvnug)
+
+results.interaction.0v72 <- results(dds, 
+                                  name="time_72hr_vs_0hr",
+                                  alpha=0.05)
+
+#repeat as above, but more efficiently.
+results.interaction.0v72 <-as.data.frame(results.interaction.0v72) %>%
+  as_tibble(results.interaction.0v72, rownames = "geneID") %>%
+  left_join(goTerms_molecular, "geneID")
+
+vennDat <- tibble(geneID=rownames(results.interaction.0v72)) %>% 
+  mutate(UR_Genotype = results.interaction.symvnug$padj < 0.05 & !is.na(results.interaction.symvnug$padj) & results.interaction.symvnug$log2FoldChange > 0) %>% 
+  mutate(DR_Genotype = results.interaction.symvnug$padj < 0.05 & !is.na(results.interaction.symvnug$padj) & results.interaction.symvnug$log2FoldChange < 0) %>%
+  mutate(UR_Time = results.interaction.0v72$padj < 0.05 & !is.na(results.interaction.0v72$padj) & results.interaction.0v72$log2FoldChange > 0) %>%
+  mutate(DR_Time = results.interaction.0v72$padj < 0.05 & !is.na(results.interaction.0v72$padj) & results.interaction.0v72$log2FoldChange < 0) 
+
+ggvenn(vennDat, set_name_size = 3)
+```
+![venn](venn.png)
+
+It looks like we see the most differences when looking at differences in time (specifically time 0 and time 72), regardless of genotype. 
