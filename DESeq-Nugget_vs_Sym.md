@@ -303,7 +303,12 @@ fviz_pca_ind(pca,
              )
              
 ```
+It looks like our samples are grouping together strongly by genotype and either time 0 or non-time 0.
+
+
 ![pca1](images/pca1.png)
+
+Let's see if we can figure out what genes are contributing to the clustering. The longer the arrow, the larger the effect. 
 
 ```r
 #fancy PCA by variables
@@ -313,9 +318,9 @@ fviz_pca_var(pca,
              repel = TRUE     # Avoid text overlapping
              )
 ```
+Unfortunately, this plot isn't super informative because we just have too many differentially expressed genes.
 ![pca2](images/pca2.png)
 
-This plot isn't super informative because we just have too many differentially expressed genes.
 
 ```r
 #biplot
@@ -324,8 +329,8 @@ fviz_pca_biplot(pca, repel = TRUE,
                 col.ind = "#696969"  # Individuals color
                 )
 ```
-![biplot](images/biplot.png)
 Once again, the biplot is a bit too busy. 
+![biplot](images/biplot.png)
 
 
 ```r
