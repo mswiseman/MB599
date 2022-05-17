@@ -243,7 +243,7 @@ rownames(mat_vst) <- colnames(mat_vst) <- with(colData(dds), paste(genotype, tim
 
 ```
 
-# PCA plots
+# Heat maps
 
 ```r
 rv <- rowVars(assay(rld))
@@ -286,6 +286,10 @@ pheatmap(cor, border_color=NA, fontsize = 10,
 ![pheatmap1](images/pheatmap1.png)
 
 I frankly prefer pheatmap, but both are clear about communicating the differences in gene expression between genotypes. 
+
+# PCA Plots
+
+A PCA plot shows clusters of samples based on their similarity; the closer the points, the more similar their gene expression profiles are.
 
 ```r
 #Make a new df that binds metadata and PCA values
@@ -333,9 +337,23 @@ fviz_pca_ind(pca,
              legend.title = "Groups",
              repel = TRUE
              )
+             
+#grouping by genotype
+groups <- genotype
+
+fviz_pca_ind(pca,
+             col.ind = groups, # color by groups
+             addEllipses = TRUE, # Concentration ellipses
+             ellipse.type = "confidence",
+             legend.title = "Groups",
+             repel = TRUE
+             )
 ```
 ![pca3](images/pca3.png)
+![pca3](images/pca4.png)
 
+# Scree plot
+A scree plot is a graphical tool used in the selection of the number of relevant components or factors to be considered in a principal components analysis or a factor analysis. The
 
 ```r
 #scree plot
