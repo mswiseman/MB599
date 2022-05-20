@@ -330,6 +330,7 @@ fviz_pca_biplot(pca, repel = TRUE,
                 )
 ```
 Once again, the biplot is a bit too busy. 
+
 ![biplot](images/biplot.png)
 
 
