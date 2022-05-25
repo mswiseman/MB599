@@ -260,10 +260,10 @@ ggplot(geneCounts2, aes(x = dex, y = count, color = cell)) +
   scale_y_log10() +  geom_beeswarm(cex = 3)
 ```
 **Condition**
-![Gene counts per genotype by condition](Documents/Genecounts5.24.jpeg)
+![Gene counts per genotype by condition](images/Genecounts5.24.jpeg)
 
 **Time**
-![Gene counts per genotype by time](Documents/Genecounts_time5.17.jpeg)
+![Gene counts per genotype by time](images/Genecounts_time5.17.jpeg)
 
 # Heat maps
 
@@ -317,7 +317,7 @@ anno <- as.data.frame(colData(vst)[, c("genotype","condition")])
 pheatmap(mat, annotation_col = anno)
 
 ```
-![pheatmap2](Documents/Heatmap5.17.jpeg)
+![pheatmap2](images/Heatmap5.17.jpeg)
 
 To make a heatmap that will find 10 genes that react in a condition-specific manner over time, compared to a set of baseline samples
 ```r
@@ -348,7 +348,7 @@ mat[mat > thr] <- thr
 pheatmap(mat, breaks=seq(from=-thr, to=thr, length=101),
          cluster_col=FALSE)
 ```
-![pheatmap3](Documents/Heatmap_2_5.17.jpeg)
+![pheatmap3](images/Heatmap_2_5.17.jpeg)
 
 I frankly prefer pheatmap, but both are clear about communicating the differences in gene expression between genotypes. 
 
