@@ -242,6 +242,28 @@ rownames(mat) <- colnames(mat) <- with(colData(dds), paste(genotype, time, sep="
 rownames(mat_vst) <- colnames(mat_vst) <- with(colData(dds), paste(genotype, time, sep=" : "))
 
 ```
+# Counts plot
+
+```r
+#visualing the normalized gene counts for each treatment
+#condition
+library("ggbeeswarm")
+geneCounts <- plotCounts(dds, gene = topGene, intgroup = c("condition","genotype"),
+                         returnData = TRUE)
+ggplot(geneCounts, aes(x = dex, y = count, color = cell)) +
+  scale_y_log10() +  geom_beeswarm(cex = 3)
+  
+#time
+geneCounts2 <- plotCounts(dds, gene = topGene, intgroup = c("time","genotype"),
+                         returnData = TRUE)
+ggplot(geneCounts2, aes(x = dex, y = count, color = cell)) +
+  scale_y_log10() +  geom_beeswarm(cex = 3)
+```
+**Condition**
+![Gene counts per genotype by condition](Documents/Genecounts5.24.jpeg)
+
+**Time**
+![Gene counts per genotype by time](Documents/Genecounts_time5.17.jpeg)
 
 # Heat maps
 
@@ -284,6 +306,49 @@ pheatmap(cor, border_color=NA, fontsize = 10,
   		fontsize_row = 6, height=20)
 ```
 ![pheatmap1](images/pheatmap1.png)
+
+To make a heatmap visualizing the amount by which the top 10 genes deviate the most in a specific sample from the gene's average across all samples
+```r
+topVarGenes <- head(order(rowVars(assay(vst)), decreasing = TRUE), 10)
+
+mat  <- assay(vst)[ topVarGenes, ]
+mat  <- mat - rowMeans(mat)
+anno <- as.data.frame(colData(vst)[, c("genotype","condition")])
+pheatmap(mat, annotation_col = anno)
+
+```
+![pheatmap2](Documents/Heatmap5.17.jpeg)
+
+To make a heatmap that will find 10 genes that react in a condition-specific manner over time, compared to a set of baseline samples
+```r
+#If not already loaded 
+library("fission")
+
+ddsTC <- DESeqDataSet(dds, ~ genotype + time + genotype:time)
+
+#Run DEseq again
+ddsTC <- DESeq(ddsTC, test="LRT", reduced = ~ genotype + time)
+resTC <- results(ddsTC)
+resTC$symbol <- mcols(ddsTC)$symbol
+head(resTC[order(resTC$padj),], 4)
+
+#View 
+resultsNames(ddsTC)
+
+#Extract a matrix of the log2 fold changes using the coef function. these are the maximum likelihood estimates (MLE).
+betas <- coef(ddsTC)
+colnames(betas)
+
+#Plot the log2fold changes
+topGenes <- head(order(resTC$padj),10)
+mat <- betas[topGenes, -c(1,2)]
+thr <- 3 
+mat[mat < -thr] <- -thr
+mat[mat > thr] <- thr
+pheatmap(mat, breaks=seq(from=-thr, to=thr, length=101),
+         cluster_col=FALSE)
+```
+![pheatmap3](Documents/Heatmap_2_5.17.jpeg)
 
 I frankly prefer pheatmap, but both are clear about communicating the differences in gene expression between genotypes. 
 
