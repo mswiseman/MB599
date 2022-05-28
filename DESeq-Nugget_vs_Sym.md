@@ -497,3 +497,7 @@ ggvenn(vennDat, set_name_size = 3)
 ![venn](images/venn.png)
 
 It looks like we see the most differences when looking at differences in time (specifically time 0 and time 72), regardless of genotype. This agrees with the PCA plots we looked at above.
+
+Let's simplify our DESeq contrasts this time and instead group all timepoints after 0 as inoculated and all 0 time points uninoculated; admittedly, this gives us an unbalanced design, but, based on the PCA groupings, it seems there are much larger differences between time point 0 and all other time points than any other comparison. 
+
+Continue [here](UninocVsInoc.md). 
