@@ -500,4 +500,4 @@ It looks like we see the most differences when looking at differences in time (s
 
 Let's simplify our DESeq contrasts this time and instead group all timepoints after 0 as inoculated and all 0 time points uninoculated; admittedly, this gives us an unbalanced design, but, based on the PCA groupings, it seems there are much larger differences between time point 0 and all other time points than any other comparison. 
 
-Continue [here](UninocVsInoc.md). 
+Continue [here](DESeq-Uninoc_Vs_Inoc.md). 
