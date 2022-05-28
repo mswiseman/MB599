@@ -1,6 +1,6 @@
 Continued from [Nugget vs. Symphony](DESeq-Nugget_vs_Sym.md). 
 
-`r load your packages
+`r
 library(PCAtools)
 library(genefilter)
 library(pheatmap)
