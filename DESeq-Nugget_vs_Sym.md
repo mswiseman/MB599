@@ -121,6 +121,10 @@ dds <-dds[ rowSums(counts(dds)) > 10, ]
 
 ```
 # Running DESeq
+This DESeq is making all possible comparisons within our data; we can choose to look at all comparisons at once, or we can make a subset of them by defining a contrast within our results. 
+
+<img src="images/allway.png" width="400">
+
 ```r 
 
 #run DESeq... this performs the median of ratios normalization method
@@ -151,6 +155,9 @@ plotDispEsts(dds)
 ![dispest](images/dispest.png)
 
 # Examining dds results (as dds object)
+
+If we choose to look at just genotypes, this is what that comparison would look like:
+<img src="images/genotypes.png" width="100" height="400">
 
 ```r
 
