@@ -1,0 +1,26 @@
+Continued from [Nugget vs. Symphony](DESeq-Nugget_vs_Sym.md). 
+
+`r load your packages
+library(PCAtools)
+library(genefilter)
+library(pheatmap)
+library(RColorBrewer)
+library(DESeq2)
+library(tximportData)
+library(tximport)
+library(hexbin)
+library(readr)
+library(adegenet)
+library(readxl)
+library(janitor)
+library(gplots)
+library(factoextra)
+library(cowplot)
+library(apeglm)
+library(tidyverse)
+library(ggpubr)
+library(ggvenn)
+library(ggVennDiagram)
+library(cowplot)
+library(kableExtra)
+`
