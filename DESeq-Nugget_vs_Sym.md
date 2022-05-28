@@ -158,7 +158,7 @@ plotDispEsts(dds)
 
 If we choose to look at just genotypes, this is what that comparison would look like:
 
-<img src="images/genotypes.png" height="400">
+<img src="images/genotypes.png" width="400">
 
 ```r
 
