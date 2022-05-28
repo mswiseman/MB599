@@ -4,6 +4,8 @@ Continued from [Nugget vs. Symphony](DESeq-Nugget_vs_Sym.md).
 
 ![UninocVsInoc.png](images/UninocVsInoc.png =250x250)
 
+<img src="images/UninocVsInoc.png" width="300">
+
 Since the time points seem to cluster closely, it might be more informative to look just at uninoculated/inoculated. So, I made a new dds object to examine just that. 
 
 ```r load packages, message=FALSE, warning=FALSE, include=FALSE
