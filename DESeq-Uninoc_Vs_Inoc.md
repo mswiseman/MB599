@@ -63,3 +63,245 @@ names(goTerms_biological) <- c('geneID', 'UNIProt_ID', 'GO ID', 'Description', '
 names(goTerms_cellular) <- c('geneID', 'UNIProt_ID', 'GO ID', 'Description', 'Key terms')
 names(goTerms_molecular) <- c('geneID', 'UNIProt_ID', 'GO ID', 'Description', 'Key terms')
 ```
+
+```{r running deseq}
+
+#run DESeq... this performs the median of ratios normalization method
+dds <- DESeq(dds)
+
+#check out the normalization
+sizeFactors(dds)
+
+## Total number of raw counts per sample
+colSums(counts(dds))
+
+## Total number of normalized counts per sample
+colSums(counts(dds, normalized=T))
+
+#extract normalized counts
+normalized_counts <- counts(dds, normalized=TRUE)
+#View(normalized_counts)
+
+# write to table
+write.table(normalized_counts, file="normalized_counts.txt", sep="\t", quote=F, col.names=NA)
+
+#NOTE: DESeq2 doesn’t actually use normalized counts, rather it uses the raw counts and models the normalization inside the Generalized Linear Model (GLM). These normalized counts will be useful for downstream visualization of results, but cannot be used as input to DESeq2 or any other tools that perform differential expression analysis which use the negative binomial model.
+
+## Plot dispersion estimates
+plotDispEsts(dds)
+
+#transform
+#log transformation
+rld <- rlog(dds) #log and vst transformations look pretty similiar. 
+rld_mat <- assay(rld)
+
+#vst transformation
+vst <- vst(dds)
+vst_mat <- assay(vst)
+
+```
+
+# Just look at symphony vs. nugget
+
+```{r}
+#difference between nugget and symphony
+base_differences <- results(dds, contrast=c("genotype","Nugget","Symphony"))
+base_differences<-data.frame(base_differences)
+
+#separate out up-regulated genes (ie upregulated in nugget, down in sym)
+base_differences_up <- base_differences %>%
+  filter(padj < 0.05) %>%
+  filter(log2FoldChange > 0)
+
+#separate out down-regulated genes (ie upregulated in symphony, down in nugget)
+base_differences_down <- base_differences %>%
+  filter(padj < 0.05) %>%
+  filter(log2FoldChange < 0)
+
+#prepping annotation
+colnames(base_differences_down)[1] <- "geneID"
+colnames(base_differences_up)[1] <- "geneID" 
+base_differences_down$geneID <- rownames(base_differences_down)
+base_differences_up$geneID <- rownames(base_differences_up)
+
+#add annotation terms
+base_differences_down<-merge(base_differences_down, goTerms_biological, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE) 
+base_differences_down<-merge(base_differences_down, kegg_pathway, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=TRUE, all.y=FALSE)
+base_differences_up<-merge(base_differences_up, goTerms_biological, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE)
+base_differences_up<-merge(base_differences_up, kegg_pathway, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=TRUE, all.y=FALSE)
+
+base_differences_up <- base_differences_up[order(base_differences_up$padj),]
+base_differences_down <- base_differences_down[order(base_differences_down$padj),]
+
+View(base_differences_up) #upregulated in Nugget over symphony https://biit.cs.ut.ee/gplink/l/GW4RMMCBTo
+
+#top gene nug over symphony
+plotCounts(dds, gene=which.min(base_differences$padj), intgroup="genotype")
+
+#quick heatmap comparing nug and sym
+select <- order(rowMeans(counts(dds,normalized=TRUE)), decreasing=TRUE)[1:20]
+df <- as.data.frame(colData(dds)[,c("condition","genotype")])
+pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
+         cluster_cols=FALSE, annotation_col=df)
+
+```
+![heatmap](https://github.com/mswiseman/MB599/blob/main/images/heatmap3.png)
+
+# Looking at the effect of the inoculation on both cultivars
+
+```r
+both_cult_treatment_diff = results(dds, contrast=c("condition","Uninoculated","Inoculated")) #number reflects uninoc as baseline
+ix = which.min(both_cult_treatment_diff$padj) # most significant
+both_cult_treatment_diff <- both_cult_treatment_diff[order(both_cult_treatment_diff$padj),] # sort
+kable(both_cult_treatment_diff[1:100,-(3:4)])
+
+#convert to df
+both_cult_treatment_diff<-data.frame(both_cult_treatment_diff)
+
+#separate out down-regulated genes (ie downreg in uninoc, up in inoc)
+both_cult_treatment_diff_down <- both_cult_treatment_diff %>%
+  filter(padj < 0.05) %>%
+  filter(log2FoldChange < 0)
+
+#separate out up-regulated genes (ie upregulated in uninoc, down in inoc)
+both_cult_treatment_diff_up <- both_cult_treatment_diff %>%
+  filter(padj < 0.05) %>%
+  filter(log2FoldChange > 0)
+
+#prepping annotation
+colnames(both_cult_treatment_diff_down)[1] <- "geneID"
+colnames(both_cult_treatment_diff_up)[1] <- "geneID" 
+both_cult_treatment_diff_down$geneID <- rownames(both_cult_treatment_diff_down)
+both_cult_treatment_diff_up$geneID <- rownames(both_cult_treatment_diff_up)
+
+#add annotation terms
+both_cult_treatment_diff_down<-merge(both_cult_treatment_diff_down, goTerms_molecular, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE)
+both_cult_treatment_diff_down<-merge(both_cult_treatment_diff_down, kegg_pathway, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=TRUE, all.y=FALSE)
+both_cult_treatment_diff_up<-merge(both_cult_treatment_diff_up, goTerms_molecular, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE)
+both_cult_treatment_diff_up<-merge(both_cult_treatment_diff_up, kegg_pathway, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=TRUE, all.y=FALSE)
+
+both_cult_treatment_diff_up <- both_cult_treatment_diff_up[order(both_cult_treatment_diff_up$padj),]
+both_cult_treatment_diff_down <- both_cult_treatment_diff_down[order(both_cult_treatment_diff_down$padj),]
+
+#print top 100 in table form
+kable(both_cult_treatment_diff_up[1:100,-(3:4)]) #(ie upregulated in uninoc, down in inoc)
+kable(both_cult_treatment_diff_down[1:100,-(3:4)]) #(ie downreg in uninoc, up in inoc)
+
+```
+
+# Looking at the effect of the inoculation on sym
+
+```{r}
+Sym_treat_effects <- results(dds, list( c("condition_Uninoculated_vs_Inoculated","genotypeSymphony.conditionUninoculated") ))
+ix = which.min(Sym_treat_effects$padj) # most significant
+Sym_treat_effects <- Sym_treat_effects[order(Sym_treat_effects$padj),] # sort
+
+#convert to df
+Sym_treat_effects <- data.frame(Sym_treat_effects)
+
+#separate out down-regulated genes (ie downreg in uninoc, up in inoc)
+Sym_treat_effects_down <- Sym_treat_effects %>%
+  filter(padj < 0.05) %>%
+  filter(log2FoldChange < 0)
+
+#separate out up-regulated genes (ie upregulated in uninoc, down in inoc)
+Sym_treat_effects_up <- Sym_treat_effects %>%
+  filter(padj < 0.05) %>%
+  filter(log2FoldChange > 0)
+
+#prepping annotation
+colnames(Sym_treat_effects_down)[1] <- "geneID"
+colnames(Sym_treat_effects_up)[1] <- "geneID" 
+Sym_treat_effects_down$geneID <- rownames(Sym_treat_effects_down)
+Sym_treat_effects_up$geneID <- rownames(Sym_treat_effects_up)
+
+#add annotation terms; downreg = downreg in uninoc
+Sym_treat_effects_down<-merge(Sym_treat_effects_down, goTerms_molecular, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE) 
+Sym_treat_effects_down<-merge(Sym_treat_effects_down, kegg_pathway, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=TRUE, all.y=FALSE)
+Sym_treat_effects_up<-merge(Sym_treat_effects_up, goTerms_molecular, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE)
+Sym_treat_effects_up<-merge(Sym_treat_effects_up, kegg_pathway, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=TRUE, all.y=FALSE)
+
+#View(Sym_treat_effects_down)
+```
+
+# Looking at the effect of the inoculation on nugget
+
+```r
+Nug_treat_effects <- results(dds, list( c("condition_Uninoculated_vs_Inoculated","genotypeSymphony.conditionUninoculated") ))
+ix = which.min(Sym_treat_effects$padj) # most significant
+Sym_treat_effects <- Sym_treat_effects[order(Sym_treat_effects$padj),] # sort
+
+#convert to df
+Sym_treat_effects <- data.frame(Sym_treat_effects)
+
+#separate out down-regulated genes (ie downreg in uninoc, up in inoc)
+Sym_treat_effects_down <- Sym_treat_effects %>%
+  filter(padj < 0.05) %>%
+  filter(log2FoldChange < 0)
+
+#separate out up-regulated genes (ie upregulated in uninoc, down in inoc)
+Sym_treat_effects_up <- Sym_treat_effects %>%
+  filter(padj < 0.05) %>%
+  filter(log2FoldChange > 0)
+
+#prepping annotation
+colnames(Sym_treat_effects_down)[1] <- "geneID"
+colnames(Sym_treat_effects_up)[1] <- "geneID" 
+Sym_treat_effects_down$geneID <- rownames(Sym_treat_effects_down)
+Sym_treat_effects_up$geneID <- rownames(Sym_treat_effects_up)
+
+#add annotation terms; downreg = downreg in uninoc
+Sym_treat_effects_down<-merge(Sym_treat_effects_down, goTerms_biological, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE) 
+Sym_treat_effects_down<-merge(Sym_treat_effects_down, kegg_pathway, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=TRUE, all.y=FALSE)
+Sym_treat_effects_up<-merge(Sym_treat_effects_up, goTerms_biological, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE)
+Sym_treat_effects_up<-merge(Sym_treat_effects_up, kegg_pathway, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=TRUE, all.y=FALSE)
+```
+#Volcano plot
+
+```r
+
+#Symphony
+
+vol_data1 <- data.frame(geneID=row.names(Sym_treat_effects), pval=-log10(Sym_treat_effects$padj), lfc=Sym_treat_effects$log2FoldChange)
+vol_data1 <- na.omit(vol_data1)
+View(vol_data1)
+
+vol_data1 <- mutate(vol_data1, color=case_when(
+    vol_data1$lfc > 0 & vol_data1$pval > 1.3 ~ "Increased",
+    vol_data1$lfc < 0 & vol_data1$pval > 1.3 ~ "Decreased",
+    vol_data1$pval < 1.3 ~ "Nonsignificant"))
+vol1 <- ggplot(vol_data1, aes(x=lfc, y=pval, color=color))
+
+vol_data2 <- data.frame(geneID=Sym_treat_effects_up$geneID, pval=-log10(Sym_treat_effects_up$padj), lfc=Sym_treat_effects_up$log2FoldChange)
+# remove na
+vol_data2 <- na.omit(vol_data2)
+# set upper and lower threshold
+vol_data2 <- mutate(vol_data2, color=case_when(
+    vol_data2$lfc > 0 & vol_data2$pval > 1.3 ~ "Increased",
+    vol_data2$lfc < 0 & vol_data2$pval > 1.3 ~ "Decreased",
+    vol_data2$pval < 1.3 ~ "nonsignificant"))
+vol2 <- ggplot(vol_data2, aes(x=lfc, y=pval, color=color))
+
+plot_grid(vol1 +  ggtitle(label="Volcano Plot") +
+            geom_point(size=2.5, alpha=0.8, na.rm=T) +
+            scale_color_manual(name="Directionality",
+                               values=c(Increased="#008B00", Decreased="#CD4F39", nonsignificant="darkgray")) +
+            theme_bw(base_size=14) +
+            theme(legend.position="right") +
+            xlab(expression(log[2]("Symphony Uninoc vs. Inoc"))) +
+            ylab(expression(-log[10]("adjusted p-value"))) +
+            geom_hline(yintercept=1.3, colour="darkgrey") +
+            scale_y_continuous(trans="log1p"), vol2 + geom_point(size=2.5, alpha=0.8, na.rm=T) +
+            scale_color_manual(name="Directionality",
+                     values=c(Increased="#008B00", Decreased="#CD4F39",
+                              nonsignificant="darkgray")) +
+            theme_bw(base_size=14) +
+            theme(legend.position="right") +
+            xlab(expression(log[2]("Nugget Uninoc vs. Inoc"))) +
+            ylab(expression(-log[10]("adjusted p-value"))) +
+            geom_hline(yintercept=1.3, colour="darkgrey") +
+            scale_y_continuous(trans="log1p"), byrow = TRUE, nrow = 2)
+dev.off()
+```
+
+![volcanoplot](images/volcanoplot.png)
