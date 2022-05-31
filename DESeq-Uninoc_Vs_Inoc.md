@@ -224,38 +224,6 @@ Sym_treat_effects_up<-merge(Sym_treat_effects_up, kegg_pathway, by.a="UNIProt_ID
 #View(Sym_treat_effects_down)
 ```
 
-# Looking at the effect of the inoculation on nugget
-
-```r
-Nug_treat_effects <- results(dds, list( c("condition_Uninoculated_vs_Inoculated","genotypeSymphony.conditionUninoculated") ))
-ix = which.min(Sym_treat_effects$padj) # most significant
-Sym_treat_effects <- Sym_treat_effects[order(Sym_treat_effects$padj),] # sort
-
-#convert to df
-Sym_treat_effects <- data.frame(Sym_treat_effects)
-
-#separate out down-regulated genes (ie downreg in uninoc, up in inoc)
-Sym_treat_effects_down <- Sym_treat_effects %>%
-  filter(padj < 0.05) %>%
-  filter(log2FoldChange < 0)
-
-#separate out up-regulated genes (ie upregulated in uninoc, down in inoc)
-Sym_treat_effects_up <- Sym_treat_effects %>%
-  filter(padj < 0.05) %>%
-  filter(log2FoldChange > 0)
-
-#prepping annotation
-colnames(Sym_treat_effects_down)[1] <- "geneID"
-colnames(Sym_treat_effects_up)[1] <- "geneID" 
-Sym_treat_effects_down$geneID <- rownames(Sym_treat_effects_down)
-Sym_treat_effects_up$geneID <- rownames(Sym_treat_effects_up)
-
-#add annotation terms; downreg = downreg in uninoc
-Sym_treat_effects_down<-merge(Sym_treat_effects_down, goTerms_biological, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE) 
-Sym_treat_effects_down<-merge(Sym_treat_effects_down, kegg_pathway, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=TRUE, all.y=FALSE)
-Sym_treat_effects_up<-merge(Sym_treat_effects_up, goTerms_biological, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE)
-Sym_treat_effects_up<-merge(Sym_treat_effects_up, kegg_pathway, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=TRUE, all.y=FALSE)
-```
 #Volcano plot
 
 ```r
@@ -305,3 +273,92 @@ dev.off()
 ```
 
 ![volcanoplot](images/volcanoplot.png)
+
+```r
+#order by pvalue, genotype
+resOrdered <- as.data.frame(res05_genotypes)
+
+#merge go terms to results df - genotype
+resOrdered <- tibble::rownames_to_column(resOrdered, "geneID")
+resOrdered<-merge(resOrdered, goTerms_molecular, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE)
+resOrdered<-merge(resOrdered, kegg_pathway, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=TRUE, all.y=FALSE)
+
+#sort by p-value and set cut-off to 0.05 for genotype comparison
+resOrdered <- resOrdered[order(resOrdered$pvalue),]
+resOrdered_pval_cutoff <- resOrdered %>%
+  filter(padj < 0.05)
+
+#subsample only results with less than 0.05 p-value and greater than 1-fold change or less than -1 fold change
+resSig <- resOrdered_pval_cutoff[ resOrdered_pval_cutoff$padj < 0.05 & (resOrdered_pval_cutoff$log2FoldChange >1| resOrdered_pval_cutoff$log2FoldChange < -1), ]
+
+#remove any rows that lack UNIProt_ID or Kegg_accession
+resSig<-resSig %>%
+    filter_at(vars(UNIProt_ID, Kegg_accession), all_vars(!is.na(.)))
+
+#genotype comparison
+write.csv(resSig, "resSig.csv")
+```
+
+
+
+# Venn diagram
+
+```r
+venn_prep_inoc <- results.condition %>%
+  filter(padj < 0.05) %>%
+  mutate(Change = if_else(log2FoldChange < 0, "Downreg_Uninoc", "Upreg_Uninoc"))
+
+venn_prep_geno <- results.interaction.symvnug %>%
+  filter(padj < 0.05) %>%
+  mutate(Change = if_else(log2FoldChange < 0, "Downreg_Genotype", "Upreg_Genotype"))
+
+View(venn_prep_geno)
+
+x <- list(up_uninoc=rownames(venn_prep_inoc)[venn_prep_inoc$Change=="Upreg_Uninoc"],
+          down_uninoc=rownames(venn_prep_inoc)[venn_prep_inoc$Change=="Downreg_Uninoc"],
+          up_gen=rownames(venn_prep_geno)[venn_prep_geno$Change=="Upreg_Genotype"],
+          down_gen=rownames(venn_prep_geno)[venn_prep_geno$Change=="Downreg_Genotype"])
+
+ggVennDiagram(x, label_alpha = 0, category.names = c("Upreg Uninoc","Downreg Uninoc","Upreg Nugget", "Downreg Nugget"))
+```
+
+[Genes upregulated in Nugget as compared to Symphony](https://biit.cs.ut.ee/gplink/l/aNUtJlb0Ts)
+
+[Genes downregulated in Nugget as compared to Symphony](https://biit.cs.ut.ee/gplink/l/uPNRUSYIQq)
+
+```r
+
+#pathogenesis related genes from Bhardwaj 2011
+pathogenesis_proteins <- read_excel("Downloads/pathogenesis_proteins.xlsx")
+
+# negative = downregulated in uninoculated; positive = upregulated in uninoculated
+Condition_effects1_path <- merge(Condition_effects1, pathogenesis_proteins, by.a="UNIProt_ID", by.b="geneID", all.x=FALSE, all.y=FALSE)
+View(Condition_effects1_path)
+
+#subset pathology-related genes
+#with UNIProt ID
+genes_UniProt_Path <- unique(Condition_effects1_path$UNIProt_ID)
+
+#with cascade dovetail ID
+genes_Path <- unique(Condition_effects1_path$geneID)
+View(genes_Path)
+
+#top inoc upregulated gene
+NPR1 <- plotCounts(dds, gene="HUMLU_CAS0027044.t1.p1", intgroup=c("condition", "genotype"), returnData=TRUE)
+
+#top differentially expressed (pre/post inoculation) gene that's pathogenesis-related
+RPM1 <- plotCounts(dds, gene="HUMLU_CAS0061636.t1.p1", intgroup=c("condition", "genotype"), returnData=TRUE)
+
+#define our color pallette
+colourPallette <- c("#7145cd","#bbcfc4","#90de4a","#cd46c1","#77dd8e","#592b79","#d7c847","#6378c9","#619a3c","#d44473","#63cfb6","#dd5d36","#5db2ce","#8d3b28","#b1a4cb","#af8439","#c679c0","#4e703f","#753148","#cac88e","#352b48","#cd8d88","#463d25","#556f73")
+
+#plot the normalized gene counts of RPM1. 
+ggplot(RPM1, aes(x=genotype, y=count, fill=time)) + geom_col(position = "dodge2") +  theme_bw() +  theme(axis.text.x=element_text(angle=15, hjust=1)) + scale_colour_manual(values=colourPallette) + guides(colour=guide_legend(ncol=3)) + ggtitle("Disease resistance protein RPM1")
+
+#plot the normalized gene counts of NPR1. NPR1 is a key player in the SA pathway, so this makes sense. 
+ggplot(NPR1, aes(x=genotype, y=count, fill=time)) + geom_col(position = "dodge2") +  theme_classic() +  theme(axis.text.x=element_text(angle=15, hjust=1)) + scale_colour_manual(values=colourPallette) + guides(colour=guide_legend(ncol=3)) + ggtitle("ARABIDOPSIS NONEXPRESSER OF PR GENES 1")
+
+RPM1
+
+#SA pathway: https://www.genome.jp/dbget-bin/www_bget?ath:AT1G64280
+```
