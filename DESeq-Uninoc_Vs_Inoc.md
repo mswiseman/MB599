@@ -1,8 +1,3 @@
-Uninoc Vs Inoc
-================
-Michele Wiseman
-6/1/2022
-
 Continued from [Nugget vs. Symphony](DESeq-Nugget_vs_Sym.md). 
 
 # Unioculated plants vs. Inoculated plants. 
@@ -2307,7 +2302,7 @@ plot_grid(vol1 +  ggtitle(label="Volcano Plot") +
             scale_y_continuous(trans="log1p"), byrow = TRUE, nrow = 2)
 ```
 
-![](images/unnamed-chunk-1-1.png)<!-- -->
+![volcano plot](images/unnamed-chunk-1-1.png)<!-- -->
 
 ``` r
 #lets just compare nugget and symphony
