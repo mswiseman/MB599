@@ -6,6 +6,7 @@ Continued from [Nugget vs. Symphony](DESeq-Nugget_vs_Sym.md).
 
 Since the time points seem to cluster closely, it might be more informative to look just at uninoculated/inoculated (it also makes for much simpler comparisons as opposed to our previous [comparisons](images/allway.png)). So, we made a new dds object to examine just that. 
 
+
 ``` r
 library(heatmap3)
 library(topGO)
@@ -227,7 +228,7 @@ head(normalized_counts)
 plotDispEsts(dds)
 ```
 
-![](uninocvinoc_files/figure-gfm/continue%20deseq-1.png)<!-- -->
+![](images/continue%20deseq-1.png)<!-- -->
 
 ``` r
 #transform
@@ -283,7 +284,7 @@ base_differences_down <- base_differences_down[order(base_differences_down$log2F
 plotCounts(dds, gene=which.min(base_differences$padj), intgroup="genotype")
 ```
 
-![](uninocvinoc_files/figure-gfm/effect%20of%20genotype-1.png)<!-- -->
+![](images/effect%20of%20genotype-1.png)<!-- -->
 
 ``` r
 #quick heatmap comparing nug and sym
@@ -305,7 +306,7 @@ pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=FALSE, annotation_col=df)
 ```
 
-![](uninocvinoc_files/figure-gfm/effect%20of%20genotype-2.png)<!-- -->
+![](images/effect%20of%20genotype-2.png)<!-- -->
 
 ``` r
 #semi-fancy tables
@@ -2209,7 +2210,7 @@ Sym_treat_effects <- data.frame(Sym_treat_effects)
 barplot(assay(dds)[ix,],las=2, main=rownames(dds)[ix])
 ```
 
-![](uninocvinoc_files/figure-gfm/just%20looking%20at%20effect%20on%20symphony-1.png)<!-- -->
+![](images/just%20looking%20at%20effect%20on%20symphony-1.png)<!-- -->
 
 ``` r
 #separate out down-regulated genes (ie downreg in uninoc, up in inoc)
@@ -2254,7 +2255,7 @@ Condition_effects1 <- data.frame(Condition_effects1)
 barplot(assay(dds)[ix,],las=2, main=rownames(dds)[ix])
 ```
 
-![](uninocvinoc_files/figure-gfm/effect%20of%20inoculation-1.png)<!-- -->
+![](images/effect%20of%20inoculation-1.png)<!-- -->
 
 ``` r
 #separate out down-regulated genes (ie downreg in uninoc, up in inoc)
@@ -2362,7 +2363,7 @@ plot_grid(vol1 +  ggtitle(label="Volcano Plot") +
             scale_y_continuous(trans="log1p"), byrow = TRUE, nrow = 2)
 ```
 
-![](uninocvinoc_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
+![](images/unnamed-chunk-1-1.png)<!-- -->
 
 ``` r
 #lets just compare nugget and symphony
@@ -2391,13 +2392,13 @@ resultsNames(dds)
 plotMA(res05_genotypes, ylim=c(-2,2)) 
 ```
 
-![](uninocvinoc_files/figure-gfm/set%20up%20genotype%20contrasts-1.png)<!-- -->
+![](images/set%20up%20genotype%20contrasts-1.png)<!-- -->
 
 ``` r
 plotMA(res05_condition, ylim=c(-2,2))
 ```
 
-![](uninocvinoc_files/figure-gfm/set%20up%20genotype%20contrasts-2.png)<!-- -->
+![](images/set%20up%20genotype%20contrasts-2.png)<!-- -->
 
 ``` r
 #order by pvalue, genotype
@@ -2534,14 +2535,14 @@ hmcol <- colorRampPalette(brewer.pal(9, "GnBu"))(100)
 heatmap.2(mat, trace = "none", col = rev(hmcol), margin = c(13,13))
 ```
 
-![](uninocvinoc_files/figure-gfm/quick%20heat%20map-1.png)<!-- -->
+![](images/quick%20heat%20map-1.png)<!-- -->
 
 ``` r
 #do we see a difference with the vst-transformed data?
 heatmap.2(mat_vst, trace = "none", col = rev(hmcol), margin = c(13,13))
 ```
 
-![](uninocvinoc_files/figure-gfm/quick%20heat%20map-2.png)<!-- -->
+![](images/quick%20heat%20map-2.png)<!-- -->
 
 ``` r
 #transpose and then do comphrensive PCA.
@@ -2553,7 +2554,7 @@ pheatmap(cor, border_color=NA, fontsize = 10,
         fontsize_row = 6, height=20)
 ```
 
-![](uninocvinoc_files/figure-gfm/heat%20maps-1.png)<!-- -->
+![](images/heat%20maps-1.png)<!-- -->
 
 ``` r
 #Make a new df that binds metadata and PCA values
@@ -2568,14 +2569,14 @@ pheatmap(vst_cor, border_color=NA, fontsize = 10,
         fontsize_row = 6, height=20)
 ```
 
-![](uninocvinoc_files/figure-gfm/heat%20maps-2.png)<!-- -->
+![](images/heat%20maps-2.png)<!-- -->
 
 ``` r
 #scree plot
 fviz_eig(pca) 
 ```
 
-![](uninocvinoc_files/figure-gfm/scree%20plot-1.png)<!-- --> # Venn
+![](images/scree%20plot-1.png)<!-- --> # Venn
 diagram
 
 ``` r
@@ -2623,7 +2624,7 @@ vennDat <- tibble(geneID=rownames(results.condition)) %>%
 ggvenn(vennDat, set_name_size = 3)
 ```
 
-![](uninocvinoc_files/figure-gfm/Venn%20diagram-1.png)<!-- -->
+![](images/Venn%20diagram-1.png)<!-- -->
 
 ``` r
 #Susceptibility genes?
@@ -2707,7 +2708,7 @@ ggplot(NPR1, aes(x=condition, y=count, fill=condition)) +
   ggtitle("ARABIDOPSIS NONEXPRESSER OF PR GENES 1") 
 ```
 
-![](uninocvinoc_files/figure-gfm/Pathogenesis%20genes-1.png)<!-- -->
+![](images/Pathogenesis%20genes-1.png)<!-- -->
 
 ``` r
 #plot the normalized gene counts of MLO12. This shows increased expression overtime in symphony, which is classic of a susceptibility-gene. 
@@ -2721,7 +2722,7 @@ ggplot(MLO12, aes(x=condition, y=count, fill=condition)) +
   ggtitle("MLO12") 
 ```
 
-![](uninocvinoc_files/figure-gfm/Pathogenesis%20genes-2.png)<!-- -->
+![](images/Pathogenesis%20genes-2.png)<!-- -->
 
 ``` r
 #SA pathway: https://www.genome.jp/dbget-bin/www_bget?ath:AT1G64280
@@ -2876,79 +2877,79 @@ RPM1_ARATH_13p <-ggplot(RPM1_ARATH_13, aes(x=condition, y=count, fill=condition)
 RPM1_ARATH_1p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-1.png)<!-- -->
+![](images/RPM%20genes-1.png)<!-- -->
 
 ``` r
 RPM1_ARATH_2p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-2.png)<!-- -->
+![](images/RPM%20genes-2.png)<!-- -->
 
 ``` r
 RPM1_ARATH_3p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-3.png)<!-- -->
+![](images/RPM%20genes-3.png)<!-- -->
 
 ``` r
 RPM1_ARATH_4p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-4.png)<!-- -->
+![](images/RPM%20genes-4.png)<!-- -->
 
 ``` r
 RPM1_ARATH_5p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-5.png)<!-- -->
+![](images/RPM%20genes-5.png)<!-- -->
 
 ``` r
 RPM1_ARATH_6p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-6.png)<!-- -->
+![](images/RPM%20genes-6.png)<!-- -->
 
 ``` r
 RPM1_ARATH_7p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-7.png)<!-- -->
+![](images/RPM%20genes-7.png)<!-- -->
 
 ``` r
 RPM1_ARATH_8p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-8.png)<!-- -->
+![](images/RPM%20genes-8.png)<!-- -->
 
 ``` r
 RPM1_ARATH_9p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-9.png)<!-- -->
+![](images/RPM%20genes-9.png)<!-- -->
 
 ``` r
 RPM1_ARATH_10p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-10.png)<!-- -->
+![](images/RPM%20genes-10.png)<!-- -->
 
 ``` r
 RPM1_ARATH_11p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-11.png)<!-- -->
+![](images/RPM%20genes-11.png)<!-- -->
 
 ``` r
 RPM1_ARATH_12p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-12.png)<!-- -->
+![](images/RPM%20genes-12.png)<!-- -->
 
 ``` r
 RPM1_ARATH_13p
 ```
 
-![](uninocvinoc_files/figure-gfm/RPM%20genes-13.png)<!-- -->
+![](images/RPM%20genes-13.png)<!-- -->
 
 # Look at Padgitt-Cobb data
 
@@ -3016,7 +3017,7 @@ heatmap3(pagit2020_counts_rld_matrix,
          )
 ```
 
-![](uninocvinoc_files/figure-gfm/Padgitt%20Cobb%20Data-1.png)<!-- --> It
+![](images/Padgitt%20Cobb%20Data-1.png)<!-- --> It
 looks like there are 24 up-regulated genes in Nugget that are likely
 R-related genes near the QTL locus of interest.
 
@@ -3056,7 +3057,7 @@ ggplot(R_genes, aes(x=Gene, fill=Gene)) +
     text = element_text(face = "bold")
   )
 ```
-![](uninocvinoc_files/figure-gfm/putative%20R%20genes-1.png)<!-- -->
+![](images/putative%20R%20genes-1.png)<!-- -->
 
 ``` r
 #pathogenesis related genes from Bhardwaj 2011
@@ -3123,7 +3124,7 @@ heatmap(Condition_effects1_path_rld_matrix2,
          SideColors=rowSide)
 ```
 
-![](uninocvinoc_files/figure-gfm/Other%20pathogenesis%20proteins-1.png)<!-- -->
+![](images/Other%20pathogenesis%20proteins-1.png)<!-- -->
 
 ``` r
 #what if we pull out just symphony or nugget? 
