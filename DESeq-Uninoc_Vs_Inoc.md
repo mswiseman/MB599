@@ -2645,6 +2645,7 @@ r_venn <- ggvenn(vennDat3, set_name_size = 3, text_size =2.5, fill_color = c("#f
 
 #sus_venn + r_venn
 ```
+![sus_venn_r_venn.png](images/sus_venn_r_venn.png)
 
 ``` r
 #pathogenesis related genes from Bhardwaj 2011
