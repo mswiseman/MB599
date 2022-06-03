@@ -2454,22 +2454,15 @@ res_cond_Sig <- resOrdered_pval_cond_cutoff[ resOrdered_pval_cond_cutoff$padj < 
 write.csv(res_cond_Sig, "res_cond_Sig.csv")
 ```
 
-[Genes upregulated in
-uninoculated](https://biit.cs.ut.ee/gplink/l/ddjsNTJ7Th) [Genes
-downregulated in
-uninoculated](https://biit.cs.ut.ee/gplink/l/ddjsNTJ7Th)
+[Genes upregulated in uninoculated](https://biit.cs.ut.ee/gplink/l/ddjsNTJ7Th)
+
+[Genes downregulated in uninoculated](https://biit.cs.ut.ee/gplink/l/ddjsNTJ7Th)
 
 ``` r
 #transform data
 
 vst <- vst(dds, blind=FALSE)
 rld <- rlog(dds, blind=FALSE)
-```
-
-    ## rlog() may take a few minutes with 30 or more samples,
-    ## vst() is a much faster transformation
-
-``` r
 head(assay(vst), 3)
 ```
 
@@ -3097,13 +3090,7 @@ genotype <- as.factor(substr(colnames(Condition_effects1_path_rld_matrix),8,10))
 condition <- as.factor(c(rep("Uninoculated", 7), rep("Inoculated", 30)))                   #defines condition since its not in col name
 
 #defining colors
-rowCol <- brewer.pal(50,"Set2")[genes]                         #defines 4 divergent colors for our four genes
-```
-
-    ## Warning in brewer.pal(50, "Set2"): n too large, allowed maximum for palette Set2 is 8
-    ## Returning the palette you asked for with that many colors
-
-``` r
+rowCol <- brewer.pal(50,"Set2")[genes]                        #defines 4 divergent colors for our four genes
 rowSide <- cbind(Gene = rowCol)                               #using cbind so I can give my annotation a title
 colSide <- brewer.pal(5,"Reds")[time]                         #defines 5 sequential colors for our time points
 colSide2 <- brewer.pal(3,"Set2")[genotype]                    #defines 5 sequential colors for our time points
