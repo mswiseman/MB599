@@ -7,10 +7,10 @@ Continued from [Nugget vs. Symphony](DESeq-Nugget_vs_Sym.md).
 Since the time points seem to cluster closely, it might be more informative to look just at uninoculated/inoculated (it also makes for much simpler comparisons as opposed to our previous [comparisons](images/allway.png)). So, we made a new dds object to examine just that. 
 
 ``` r
+library(heatmap3)
 library(topGO)
 library(AnnotationDbi)
 library(org.Hs.eg.db)
-library(PCAtools)
 library(genefilter)
 library(pheatmap)
 library(RColorBrewer)
@@ -35,14 +35,36 @@ library(kableExtra)
 library(gage)
 ```
 
-
+Since the time points seem to cluster closely, it might be more
+informative to look just at uninoculated/inoculated. So, I made a new
+dds object to examine just that.
 
 ``` r
 #load count data into R. We have to skipa annotation columns for now since this needs to be a matrix.
 countData_NugSym <- read_excel("Desktop/NEWVERSION_dovetailAssemblyFullNonRepeatAssociatedGeneList.xlsx", 
                         col_types = c("text", "skip", "skip", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "skip", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "skip", "numeric"))
 
-#View(countData_NugSym)
+head(countData_NugSym)
+```
+
+    ## # A tibble: 6 × 38
+    ##   GeneID        `01t00p1Nug` `02t00p2Nug` `03t00p3Nug` `04t00p4Nug` `05t00p1Sym`
+    ##   <chr>                <dbl>        <dbl>        <dbl>        <dbl>        <dbl>
+    ## 1 HUMLU_CAS000…           73           75           39           55           88
+    ## 2 HUMLU_CAS000…            0            0            0            0            0
+    ## 3 HUMLU_CAS000…           11            6            4            2           50
+    ## 4 HUMLU_CAS000…            0            0            0            0            0
+    ## 5 HUMLU_CAS000…           16           17           11            0          224
+    ## 6 HUMLU_CAS000…           60           95           58           61          195
+    ## # … with 32 more variables: `06t00p2Sym` <dbl>, `07t00p3Sym` <dbl>,
+    ## #   `09t12p1Nug` <dbl>, `10t12p2Nug` <dbl>, `11t12p3Nug` <dbl>,
+    ## #   `12t12p1Sym` <dbl>, `13t12p2Sym` <dbl>, `14t12p3Sym` <dbl>,
+    ## #   `15t12p4Sym` <dbl>, `16t24p1Nug` <dbl>, `17t24p2Nug` <dbl>,
+    ## #   `18t24p3Nug` <dbl>, `19t24p4Nug` <dbl>, `20t24p1Sym` <dbl>,
+    ## #   `21t24p2Sym` <dbl>, `22t24p3Sym` <dbl>, `23t24p4Sym` <dbl>,
+    ## #   `24t48p1Nug` <dbl>, `25t48p2Nug` <dbl>, `26t48p3Nug` <dbl>, …
+
+``` r
 #Store GeneID info because the matrix doesnt like it. 
 GeneID <- countData_NugSym$GeneID
 
@@ -60,7 +82,7 @@ condition = as.factor(c(rep("Uninoculated", 7), rep("Inoculated", 30)))
 
 genotype=as.factor(c(rep("Nugget", 4), rep("Symphony",3), rep("Nugget", 3), rep("Symphony", 4), rep("Nugget", 4), rep("Symphony", 4), rep("Nugget", 4), rep("Symphony", 4), rep("Nugget", 4), rep("Symphony", 3)))
 
-colData = data.frame(col.names = c(" 01t00p1Nug"," 02t00p2Nug"," 03t00p3Nug"," 04t00p4Nug", " 05t00p1Sym", " 06t00p2Sym","07t00p3Sym","09t12p1Nug","10t12p2Nug","11t12p3Nug","12t12p1Sym","13t12p2Sym","14t12p3Sym","15t12p4Sym","16t24p1Nug","17t24p2Nug","18t24p3Nug","19t24p4Nug","20t24p1Sym","21t24p2Sym","22t24p3Sym","23t24p4Sym","24t48p1Nug","25t48p2Nug","26t48p3Nug","27t48p4Nug","28t48p1Sym","29t48p2Sym","30t48p3Sym","31t48p4Sym","32t72p1Nug","33t72p2Nug","34t72p3Nug","35t72p4Nug","36t72p1Sym","37t72p2Sym","39t72p4Sym"), genotype, condition) #condition
+colData = data.frame(col.names = c("01t00p1Nug","02t00p2Nug","03t00p3Nug","04t00p4Nug", "05t00p1Sym", "06t00p2Sym","07t00p3Sym","09t12p1Nug","10t12p2Nug","11t12p3Nug","12t12p1Sym","13t12p2Sym","14t12p3Sym","15t12p4Sym","16t24p1Nug","17t24p2Nug","18t24p3Nug","19t24p4Nug","20t24p1Sym","21t24p2Sym","22t24p3Sym","23t24p4Sym","24t48p1Nug","25t48p2Nug","26t48p3Nug","27t48p4Nug","28t48p1Sym","29t48p2Sym","30t48p3Sym","31t48p4Sym","32t72p1Nug","33t72p2Nug","34t72p3Nug","35t72p4Nug","36t72p1Sym","37t72p2Sym","39t72p4Sym"), genotype, condition) #condition
 
 #create DESEQ2 object genotype and condition plus their interaction
 dds <- DESeqDataSetFromMatrix(countData = countData2_NugSym_mtx, colData = colData, ~ genotype + condition + genotype:condition)
@@ -74,43 +96,11 @@ dds <-dds[ rowSums(counts(dds)) > 10, ]
 ```
 
 # Annotations
-```r
-goTerms_biological <- read_tsv('/Users/michelewiseman/Desktop/goTerms_biologicalProcesses(1).tsv', col_names=FALSE)
-goTerms_cellular <- read_tsv('/Users/michelewiseman/Desktop/goTerms_cellularComponents(1).tsv', col_names=FALSE)
-goTerms_molecular <- read_tsv('/Users/michelewiseman/Desktop/goTerms_molecularFunction(1).tsv', col_names=FALSE)
-kegg_pathway <- read_csv('/Users/michelewiseman/Desktop/kegg_pathway_map.csv', col_names=TRUE)
-
-names(goTerms_biological) <- c('geneID', 'UNIProt_ID', 'GO ID', 'Description', 'Key terms')
-names(goTerms_cellular) <- c('geneID', 'UNIProt_ID', 'GO ID', 'Description', 'Key terms')
-names(goTerms_molecular) <- c('geneID', 'UNIProt_ID', 'GO ID', 'Description', 'Key terms')
-```
 
 ``` r
 #run DESeq... this performs the median of ratios normalization method
 dds <- DESeq(dds)
-```
 
-    ## estimating size factors
-
-    ## estimating dispersions
-
-    ## gene-wise dispersion estimates
-
-    ## mean-dispersion relationship
-
-    ## final dispersion estimates
-
-    ## fitting model and testing
-
-    ## -- replacing outliers and refitting for 219 genes
-    ## -- DESeq argument 'minReplicatesForReplace' = 7 
-    ## -- original counts are preserved in counts(dds)
-
-    ## estimating dispersions
-
-    ## fitting model and testing
-
-``` r
 #check out the normalization
 sizeFactors(dds)
 ```
@@ -167,8 +157,67 @@ colSums(counts(dds, normalized=T))
 ``` r
 #extract normalized counts
 normalized_counts <- counts(dds, normalized=TRUE)
-#View(normalized_counts)
+head(normalized_counts)
+```
 
+    ##                        01t00p1Nug 02t00p2Nug 03t00p3Nug 04t00p4Nug 05t00p1Sym
+    ## HUMLU_CAS0000006.t1.p1  71.607806  75.188144  39.713781 54.2523175  80.657674
+    ## HUMLU_CAS0000010.t1.p1  10.790217   6.015052   4.073208  1.9728115  45.828224
+    ## HUMLU_CAS0000022.t1.p1  15.694862  17.042646  11.201323  0.0000000 205.310442
+    ## HUMLU_CAS0000025.t1.p1  58.855731  95.238316  59.061520 60.1707522 178.730072
+    ## HUMLU_CAS0000027.t1.p1   0.000000   0.000000   0.000000  0.9864058   3.666258
+    ## HUMLU_CAS0000030.t1.p1   9.809288   2.005017   4.073208  0.0000000  50.411046
+    ##                        06t00p2Sym 07t00p3Sym 09t12p1Nug 10t12p2Nug 11t12p3Nug
+    ## HUMLU_CAS0000006.t1.p1  82.183258 107.808512  55.247715  41.750489  57.918032
+    ## HUMLU_CAS0000010.t1.p1  20.545814  26.325334  26.117102  18.028620  28.432488
+    ## HUMLU_CAS0000022.t1.p1 183.830972 191.798865  25.112598  25.619618  42.122205
+    ## HUMLU_CAS0000025.t1.p1 175.180102 150.430482  53.238708  99.631850  96.881072
+    ## HUMLU_CAS0000027.t1.p1   8.650869   3.760762   1.004504   2.846624   3.159165
+    ## HUMLU_CAS0000030.t1.p1  36.766194  41.368383  13.058551   9.488748  13.689717
+    ##                        12t12p1Sym 13t12p2Sym 14t12p3Sym 15t12p4Sym 16t24p1Nug
+    ## HUMLU_CAS0000006.t1.p1  99.360879   88.23772 102.174722   92.33470  44.302369
+    ## HUMLU_CAS0000010.t1.p1  71.703727   40.72510  59.383599   40.10497  19.979500
+    ## HUMLU_CAS0000022.t1.p1 264.279451  238.69434 233.167955  380.53089  19.979500
+    ## HUMLU_CAS0000025.t1.p1 188.478368  186.65671 179.897373  153.89117  94.685454
+    ## HUMLU_CAS0000027.t1.p1   4.097356    0.00000   1.746576    0.00000   0.000000
+    ## HUMLU_CAS0000030.t1.p1  37.900541   55.43139  35.804817   32.64358   8.686739
+    ##                        17t24p2Nug 18t24p3Nug 19t24p4Nug 20t24p1Sym 21t24p2Sym
+    ## HUMLU_CAS0000006.t1.p1   34.89721   40.40581   45.30659  88.745210 101.729479
+    ## HUMLU_CAS0000010.t1.p1   18.05028   14.69302   17.88418  43.747639  52.406095
+    ## HUMLU_CAS0000022.t1.p1   13.23687    0.00000   23.84557 382.479357 255.094376
+    ## HUMLU_CAS0000025.t1.p1   62.57431   52.64999   66.76760 208.738734 162.613032
+    ## HUMLU_CAS0000027.t1.p1    0.00000    0.00000    0.00000   2.499865   3.853389
+    ## HUMLU_CAS0000030.t1.p1   12.03352   11.01977   19.07646  24.998651  31.597793
+    ##                        22t24p3Sym 23t24p4Sym 24t48p1Nug 25t48p2Nug 26t48p3Nug
+    ## HUMLU_CAS0000006.t1.p1   68.87241  65.618787  35.551217 34.4843066   49.14625
+    ## HUMLU_CAS0000010.t1.p1   42.63530 107.281509  19.045295 28.7369221   15.51987
+    ## HUMLU_CAS0000022.t1.p1  233.94754 231.228107  11.427177 23.7079608    0.00000
+    ## HUMLU_CAS0000025.t1.p1  192.40545 246.851627  73.641807 85.4923434   64.01945
+    ## HUMLU_CAS0000027.t1.p1    7.65249   2.083136   0.000000  0.7184231    0.00000
+    ## HUMLU_CAS0000030.t1.p1   34.98281  41.662722   8.887804 15.8053072   15.51987
+    ##                        27t48p4Nug 28t48p1Sym 29t48p2Sym 30t48p3Sym 31t48p4Sym
+    ## HUMLU_CAS0000006.t1.p1 38.8552900   52.81022  87.874539   43.09265  72.213069
+    ## HUMLU_CAS0000010.t1.p1 15.9406318   74.62314 105.266374   48.20534  51.332182
+    ## HUMLU_CAS0000022.t1.p1 22.9146582  223.86943 312.137684  278.27629 222.729466
+    ## HUMLU_CAS0000025.t1.p1 85.6808959  187.13188 196.802352  184.05676 213.159059
+    ## HUMLU_CAS0000027.t1.p1  0.9962895    6.88829   4.576799    7.30384   3.480148
+    ## HUMLU_CAS0000030.t1.p1 18.9295002   70.03095  44.852629   74.49917  37.411590
+    ##                        32t72p1Nug 33t72p2Nug 34t72p3Nug 35t72p4Nug 36t72p1Sym
+    ## HUMLU_CAS0000006.t1.p1   64.27722  88.092503  56.638425   63.28084 110.686582
+    ## HUMLU_CAS0000010.t1.p1   37.81013  15.058547   7.608147   18.54783  57.285161
+    ## HUMLU_CAS0000022.t1.p1   22.68608  11.293911   5.917447    0.00000 391.286777
+    ## HUMLU_CAS0000025.t1.p1  117.21140  69.269318 105.668704   89.46601 218.460360
+    ## HUMLU_CAS0000027.t1.p1    0.00000   4.517564   2.536049    0.00000   7.767479
+    ## HUMLU_CAS0000030.t1.p1   21.42574  36.140514  25.360489   25.09412  50.488616
+    ##                        37t72p2Sym 39t72p4Sym
+    ## HUMLU_CAS0000006.t1.p1  74.012966   65.84156
+    ## HUMLU_CAS0000010.t1.p1  38.615460   11.97119
+    ## HUMLU_CAS0000022.t1.p1 194.149953  228.64977
+    ## HUMLU_CAS0000025.t1.p1 160.897751  209.49586
+    ## HUMLU_CAS0000027.t1.p1   4.290607    0.00000
+    ## HUMLU_CAS0000030.t1.p1  48.269325   57.46172
+
+``` r
 #write to table
 #write.table(normalized_counts, file="normalized_counts.txt", sep="\t", quote=F, col.names=NA)
 
@@ -178,7 +227,7 @@ normalized_counts <- counts(dds, normalized=TRUE)
 plotDispEsts(dds)
 ```
 
-![](images/continue%20deseq-1.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/continue%20deseq-1.png)<!-- -->
 
 ``` r
 #transform
@@ -234,18 +283,29 @@ base_differences_down <- base_differences_down[order(base_differences_down$log2F
 plotCounts(dds, gene=which.min(base_differences$padj), intgroup="genotype")
 ```
 
-![](images/effect%20of%20genotype-1.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/effect%20of%20genotype-1.png)<!-- -->
 
 ``` r
 #quick heatmap comparing nug and sym
 select <- order(rowMeans(counts(dds,normalized=TRUE)), decreasing=TRUE)[1:20]
 df <- as.data.frame(colData(dds)[,c("condition","genotype")])
-#View(df)
+head(df)
+```
+
+    ##               condition genotype
+    ## 01t00p1Nug Uninoculated   Nugget
+    ## 02t00p2Nug Uninoculated   Nugget
+    ## 03t00p3Nug Uninoculated   Nugget
+    ## 04t00p4Nug Uninoculated   Nugget
+    ## 05t00p1Sym Uninoculated Symphony
+    ## 06t00p2Sym Uninoculated Symphony
+
+``` r
 pheatmap(assay(rld)[select,], cluster_rows=FALSE, show_rownames=TRUE,
          cluster_cols=FALSE, annotation_col=df)
 ```
 
-![](images/effect%20of%20genotype-2.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/effect%20of%20genotype-2.png)<!-- -->
 
 ``` r
 #semi-fancy tables
@@ -2149,7 +2209,7 @@ Sym_treat_effects <- data.frame(Sym_treat_effects)
 barplot(assay(dds)[ix,],las=2, main=rownames(dds)[ix])
 ```
 
-![](images/just%20looking%20at%20effect%20on%20symphony-1.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/just%20looking%20at%20effect%20on%20symphony-1.png)<!-- -->
 
 ``` r
 #separate out down-regulated genes (ie downreg in uninoc, up in inoc)
@@ -2194,7 +2254,7 @@ Condition_effects1 <- data.frame(Condition_effects1)
 barplot(assay(dds)[ix,],las=2, main=rownames(dds)[ix])
 ```
 
-![](images/effect%20of%20inoculation-1.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/effect%20of%20inoculation-1.png)<!-- -->
 
 ``` r
 #separate out down-regulated genes (ie downreg in uninoc, up in inoc)
@@ -2302,7 +2362,7 @@ plot_grid(vol1 +  ggtitle(label="Volcano Plot") +
             scale_y_continuous(trans="log1p"), byrow = TRUE, nrow = 2)
 ```
 
-![volcano plot](images/unnamed-chunk-1-1.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/unnamed-chunk-1-1.png)<!-- -->
 
 ``` r
 #lets just compare nugget and symphony
@@ -2313,22 +2373,31 @@ res05_genotypes <- results(dds, contrast=contrast_genotypes, alpha=0.05)
 #resultsNames(dds)
 
 #lets look at time differences (this unfortunately clumps in nugget and symphony)
-#~time
+#~condition
 contrast_condition <- c("condition", "Uninoculated", "Inoculated")
 res05_condition <- results(dds, contrast=contrast_condition, alpha=0.05)
 #View(res05_condition)
 
+resultsNames(dds)
+```
+
+    ## [1] "Intercept"                             
+    ## [2] "genotype_Symphony_vs_Nugget"           
+    ## [3] "condition_Uninoculated_vs_Inoculated"  
+    ## [4] "genotypeSymphony.conditionUninoculated"
+
+``` r
 #visulize sig points
 plotMA(res05_genotypes, ylim=c(-2,2)) 
 ```
 
-![](images/set%20up%20genotype%20contrasts-1.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/set%20up%20genotype%20contrasts-1.png)<!-- -->
 
 ``` r
 plotMA(res05_condition, ylim=c(-2,2))
 ```
 
-![](images/set%20up%20genotype%20contrasts-2.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/set%20up%20genotype%20contrasts-2.png)<!-- -->
 
 ``` r
 #order by pvalue, genotype
@@ -2465,14 +2534,14 @@ hmcol <- colorRampPalette(brewer.pal(9, "GnBu"))(100)
 heatmap.2(mat, trace = "none", col = rev(hmcol), margin = c(13,13))
 ```
 
-![](images/quick%20heat%20map-1.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/quick%20heat%20map-1.png)<!-- -->
 
 ``` r
 #do we see a difference with the vst-transformed data?
 heatmap.2(mat_vst, trace = "none", col = rev(hmcol), margin = c(13,13))
 ```
 
-![](images/quick%20heat%20map-2.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/quick%20heat%20map-2.png)<!-- -->
 
 ``` r
 #transpose and then do comphrensive PCA.
@@ -2484,11 +2553,12 @@ pheatmap(cor, border_color=NA, fontsize = 10,
         fontsize_row = 6, height=20)
 ```
 
-![](images/heat%20maps-1.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/heat%20maps-1.png)<!-- -->
 
 ``` r
 #Make a new df that binds metadata and PCA values
 df <- cbind(colData, pca$x)
+#View(df)
 
 #vst version
 vst_mat<-assay(vst)
@@ -2498,14 +2568,14 @@ pheatmap(vst_cor, border_color=NA, fontsize = 10,
         fontsize_row = 6, height=20)
 ```
 
-![](images/heat%20maps-2.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/heat%20maps-2.png)<!-- -->
 
 ``` r
 #scree plot
 fviz_eig(pca) 
 ```
 
-![](images/scree%20plot-1.png)<!-- --> # Venn
+![](uninocvinoc_files/figure-gfm/scree%20plot-1.png)<!-- --> # Venn
 diagram
 
 ``` r
@@ -2553,29 +2623,27 @@ vennDat <- tibble(geneID=rownames(results.condition)) %>%
 ggvenn(vennDat, set_name_size = 3)
 ```
 
-![](images/Venn%20diagram-1.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/Venn%20diagram-1.png)<!-- -->
 
 ``` r
 #Susceptibility genes?
 vennDat2 <-tibble(geneID=rownames(results.condition)) %>% 
-  mutate(UR_Sym = results.genotype.symvnug$padj < 0.05 & !is.na(results.genotype.symvnug$padj) & results.genotype.symvnug$log2FoldChange > 0) %>% 
-  mutate(UR_Inoc = results.condition$padj < 0.05 & !is.na(results.condition$padj) & results.condition$log2FoldChange < 0) 
+  mutate('Upregulated Symphony' = results.genotype.symvnug$padj < 0.05 & !is.na(results.genotype.symvnug$padj) & results.genotype.symvnug$log2FoldChange > 0) %>% 
+  mutate('Upregulated Inocuated' = results.condition$padj < 0.05 & !is.na(results.condition$padj) & results.condition$log2FoldChange < 0) 
 
-ggvenn(vennDat2, set_name_size = 3)
-```
+#View(vennDat2)
 
-![](images/Venn%20diagram-2.png)<!-- -->
+sus_venn <- ggvenn(vennDat2, set_name_size = 3, text_size = 2.5, fill_color = c("#87cb28", "#7d7bc8"))
 
-``` r
 #R genes? By using '<' for results.genotype.symvnug, I'm looking at upregulated nugget genes. 
 vennDat3 <-tibble(geneID=rownames(results.condition)) %>% 
-  mutate(Upregulated_Nug = results.genotype.symvnug$padj < 0.05 & !is.na(results.genotype.symvnug$padj) & results.genotype.symvnug$log2FoldChange < 0) %>% 
-  mutate(UR_Inoc = results.condition$padj < 0.05 & !is.na(results.condition$padj) & results.condition$log2FoldChange < 0) 
+  mutate('Upregulated Nugget' = results.genotype.symvnug$padj < 0.05 & !is.na(results.genotype.symvnug$padj) & results.genotype.symvnug$log2FoldChange < 0) %>% 
+  mutate('Upregulated Inocuated' = results.condition$padj < 0.05 & !is.na(results.condition$padj) & results.condition$log2FoldChange < 0) 
 
-ggvenn(vennDat3, set_name_size = 3)
+r_venn <- ggvenn(vennDat3, set_name_size = 3, text_size =2.5, fill_color = c("#ffeb99", "#7d7bc8"))
+
+#sus_venn + r_venn
 ```
-
-![](images/Venn%20diagram-3.png)<!-- -->
 
 ``` r
 #pathogenesis related genes from Bhardwaj 2011
@@ -2588,8 +2656,9 @@ pathogenesis_proteins <- read_excel("Downloads/pathogenesis_proteins.xlsx.xlsx")
 
 ``` r
 # negative = downregulated in uninoculated; positive = upregulated in uninoculated
-Condition_effects1_path <- merge(Condition_effects1, pathogenesis_proteins, by.a="UNIProt_ID", by.b="geneID", all.x=FALSE, all.y=FALSE)
-View(Condition_effects1_path)
+#View(Condition_effects1)
+Condition_effects1_path <- merge(Condition_effects1, pathogenesis_proteins, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=FALSE, all.y=FALSE)
+#View(Condition_effects1_path)
 
 #subset pathology-related genes
 #with UNIProt ID
@@ -2597,7 +2666,7 @@ genes_UniProt_Path <- unique(Condition_effects1_path$UNIProt_ID)
 
 #with cascade dovetail ID
 genes_Path <- unique(Condition_effects1_path$geneID)
-View(genes_Path)
+#View(genes_Path)
 
 MLO12 <- plotCounts(dds, gene="HUMLU_CAS0068957.t1.p1", intgroup=c("condition", "genotype"), returnData=TRUE)
 
@@ -2638,7 +2707,7 @@ ggplot(NPR1, aes(x=condition, y=count, fill=condition)) +
   ggtitle("ARABIDOPSIS NONEXPRESSER OF PR GENES 1") 
 ```
 
-![](images/Pathogenesis%20genes-1.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/Pathogenesis%20genes-1.png)<!-- -->
 
 ``` r
 #plot the normalized gene counts of MLO12. This shows increased expression overtime in symphony, which is classic of a susceptibility-gene. 
@@ -2652,7 +2721,7 @@ ggplot(MLO12, aes(x=condition, y=count, fill=condition)) +
   ggtitle("MLO12") 
 ```
 
-![](images/Pathogenesis%20genes-2.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/Pathogenesis%20genes-2.png)<!-- -->
 
 ``` r
 #SA pathway: https://www.genome.jp/dbget-bin/www_bget?ath:AT1G64280
@@ -2807,76 +2876,272 @@ RPM1_ARATH_13p <-ggplot(RPM1_ARATH_13, aes(x=condition, y=count, fill=condition)
 RPM1_ARATH_1p
 ```
 
-![](images/RPM%20genes-1.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-1.png)<!-- -->
 
 ``` r
 RPM1_ARATH_2p
 ```
 
-![](images/RPM%20genes-2.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-2.png)<!-- -->
 
 ``` r
 RPM1_ARATH_3p
 ```
 
-![](images/RPM%20genes-3.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-3.png)<!-- -->
 
 ``` r
 RPM1_ARATH_4p
 ```
 
-![](images/RPM%20genes-4.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-4.png)<!-- -->
 
 ``` r
 RPM1_ARATH_5p
 ```
 
-![](images/RPM%20genes-5.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-5.png)<!-- -->
 
 ``` r
 RPM1_ARATH_6p
 ```
 
-![](images/RPM%20genes-6.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-6.png)<!-- -->
 
 ``` r
 RPM1_ARATH_7p
 ```
 
-![](images/RPM%20genes-7.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-7.png)<!-- -->
 
 ``` r
 RPM1_ARATH_8p
 ```
 
-![](images/RPM%20genes-8.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-8.png)<!-- -->
 
 ``` r
 RPM1_ARATH_9p
 ```
 
-![](images/RPM%20genes-9.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-9.png)<!-- -->
 
 ``` r
 RPM1_ARATH_10p
 ```
 
-![](images/RPM%20genes-10.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-10.png)<!-- -->
 
 ``` r
 RPM1_ARATH_11p
 ```
 
-![](images/RPM%20genes-11.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-11.png)<!-- -->
 
 ``` r
 RPM1_ARATH_12p
 ```
 
-![](images/RPM%20genes-12.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-12.png)<!-- -->
 
 ``` r
 RPM1_ARATH_13p
 ```
 
-![](images/RPM%20genes-13.png)<!-- -->
+![](uninocvinoc_files/figure-gfm/RPM%20genes-13.png)<!-- -->
+
+# Look at Padgitt-Cobb data
+
+``` r
+#I manually blasted the genes listed the genes found on contig 000559 listed in the Pagit-Cobb paper to ascertain what the associated genes are in the new Dovetail genome. Then, I made a list of these genes in pagit2020_genes.
+
+#load the genes that are present on the 000559. 
+pagit2020_genes <- read_excel("Desktop/pagit2020_genes.xlsx")
+#row.names(pagit2020_genes) <- pagit2020_genes$geneID_desc
+#str(normalized_counts)
+#View(pagit2020_genes)
+
+
+#just the area that was important during QTL mapping
+pagit2020_genes <- pagit2020_genes %>%
+  filter(Scaffold=='Scaffold_76')
+#View(pagit2020_genes)
+
+#carry rld_mat from above. add geneID column.
+geneID <- row.names(rld_mat)
+rld_mat_df<-data.frame(rld_mat)
+rld_mat_df$geneID <- geneID
+rld_mat_df<-rld_mat_df %>%
+  select(geneID, everything())
+
+#merge the dataframes
+pagit2020_counts_rld<-merge(pagit2020_genes, rld_mat_df, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE) 
+
+#select just the columns of interest
+pagit2020_counts_rld_matrix <- pagit2020_counts_rld %>%
+  select(-1:-2,-4:-14) %>%
+  select(-2:-4)
+
+#actually convert to matrx
+annot_pag <- pagit2020_counts_rld_matrix$geneID_desc                      #set aside for later
+col_names <- colData$col.names                                            #set aside for later
+row.names(pagit2020_counts_rld_matrix) <- annot_pag                       #redefine rownames
+pagit2020_counts_rld_matrix<-pagit2020_counts_rld_matrix[ , -1]           #delete geneID_desc column
+colnames(pagit2020_counts_rld_matrix) <- col_names                        #fix column names
+pagit2020_counts_rld_matrix <- as.matrix(pagit2020_counts_rld_matrix)     #make a matrix
+
+#make heat map; make groupings for specific genes too (RPPL1, RGA4, RGA2, RGA1)
+genes <- as.factor(substr(rownames(pagit2020_counts_rld_matrix),24,28))             #subsets the gene name
+time <- as.factor(substr(colnames(pagit2020_counts_rld_matrix),4,5))                #subsets the time string
+genotype <- as.factor(substr(colnames(pagit2020_counts_rld_matrix),8,10))           #subsets the genotype string
+condition <- as.factor(c(rep("Uninoculated", 7), rep("Inoculated", 30)))            #defines condition since its not in col name
+
+#defining colors
+rowCol <- brewer.pal(4,"BrBG")[genes]                         #defines 4 divergent colors for our four genes
+rowSide <- cbind(Gene = rowCol)                               #using cbind so I can give my annotation a title
+colSide <- brewer.pal(5,"Reds")[time]                         #defines 5 sequential colors for our time points
+colSide2 <- brewer.pal(3,"Set2")[genotype]                    #defines 5 sequential colors for our time points
+#colSide3 <- brewer.pal(2, "Set1")[condition]                 - doesnt add much
+ColSideColors <- cbind(Time=colSide, Genotype=colSide2)       #binds our color column color annotations
+colMain <- colorRampPalette(brewer.pal(9, "Blues"))(68)       #main color
+
+#you have to hand make legends for the side bars, so I uploaded the output to https://redketchup.io/color-picker to make sure my legend was matching the correct colors. 
+
+heatmap3(pagit2020_counts_rld_matrix,
+         RowSideColors=rowSide,
+         col=colMain,
+         ColSideColors = ColSideColors,
+         legendfun=function() showLegend(legend=c("Time 0","Time 12", "Time 24", "Time 48", "Time 72","Symphony", "Nugget"),     
+                                         col=c("#FFE8DE","#FDB698","#FD744D", "#E33020", "#AF1010","#FCA682", "#86D1BA"), cex=1)
+         )
+```
+
+![](uninocvinoc_files/figure-gfm/Padgitt%20Cobb%20Data-1.png)<!-- --> It
+looks like there are 24 up-regulated genes in Nugget that are likely
+R-related genes near the QTL locus of interest.
+
+``` r
+#24 significantly upregulated R-like genes that are found on the correct chromosome
+R_genes <- pagit2020_genes %>%
+  filter(Scaffold=='Scaffold_76')  %>%
+  filter(log2FoldChange > 0)  %>%
+  filter(padj < 0.05) %>%
+  select(geneID, Gene)
+
+head(R_genes)
+```
+
+    ## # A tibble: 6 × 2
+    ##   geneID                 Gene 
+    ##   <chr>                  <chr>
+    ## 1 HUMLU_CAS0028125.t1.p1 RGA1 
+    ## 2 HUMLU_CAS0034556.t1.p1 RGA1 
+    ## 3 HUMLU_CAS0033539.t1.p1 RPPL1
+    ## 4 HUMLU_CAS0035067.t5.p1 RPPL1
+    ## 5 HUMLU_CAS0034194.t1.p1 RPPL1
+    ## 6 HUMLU_CAS0035076.t2.p1 RPPL1
+
+``` r
+#looks like most of the candidate genes are RPPL1
+ggplot(R_genes, aes(x=Gene, fill=Gene)) +
+  geom_bar() +
+  scale_fill_brewer(palette="BrBG") +
+  theme_classic() +
+  geom_text(aes(label = ..count..), stat = "count", hjust = -0.4, colour = "black") +
+  ggtitle("RPPL1 most abundant resistance-related gene on Scaffold 76") +
+  ylab("Count") +
+  coord_flip() +
+  scale_y_discrete(limits = c(0, 2, 4, 6, 8, 10, 12)) +
+  theme(
+    text = element_text(face = "bold")
+  )
+```
+![](uninocvinoc_files/figure-gfm/putative%20R%20genes-1.png)<!-- -->
+
+``` r
+#pathogenesis related genes from Bhardwaj 2011
+# negative = downregulated in uninoculated; positive = upregulated in uninoculated
+Condition_effects1_path <- merge(Condition_effects1, pathogenesis_proteins, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=FALSE, all.y=FALSE)
+
+#carry rld_mat from above. add geneID column.
+geneID <- row.names(rld_mat)
+rld_mat_df<-data.frame(rld_mat)
+rld_mat_df$geneID <- geneID
+rld_mat_df<-rld_mat_df %>%
+  select(geneID, everything())
+
+#merge the dataframes
+Condition_effects1_path$Protein <- word(Condition_effects1_path$`Protein names...5`, 1) #create a new column called protein
+Condition_effects1_path$geneID_ann <- str_c(Condition_effects1_path$geneID, ' ', Condition_effects1_path$Protein) #combine geneID with protein 
+Condition_effects1_path_rld<-merge(Condition_effects1_path, rld_mat_df, by.a="geneID", by.b="geneID", all.x=TRUE, all.y=FALSE)  #merge
+Condition_effects1_path_rld <- Condition_effects1_path_rld %>% select(geneID_ann, everything()) #bring annotation column to front
+
+#select just the columns of interest
+Condition_effects1_path_rld <- Condition_effects1_path_rld %>%
+  select(-2:-19) %>%
+  distinct(geneID_ann, .keep_all = TRUE)
+
+#actually convert to matrx
+annot_pag <- Condition_effects1_path_rld$geneID_ann                              #set aside for later
+rownames(Condition_effects1_path_rld) <- annot_pag                               #redefine rownames
+Condition_effects1_path_rld<-Condition_effects1_path_rld[ , -1]                  #delete geneID_desc column
+colnames(Condition_effects1_path_rld) <- col_names                               #fix column names
+Condition_effects1_path_rld_matrix <- as.matrix(Condition_effects1_path_rld)     #make a matrix
+
+#make heat map; make groupings for specific genes too 
+genes <- as.factor(substr(rownames(Condition_effects1_path_rld_matrix),24,28))             #subsets the gene name
+time <- as.factor(substr(colnames(Condition_effects1_path_rld_matrix),4,5))                #subsets the time string
+genotype <- as.factor(substr(colnames(Condition_effects1_path_rld_matrix),8,10))           #subsets the genotype string
+condition <- as.factor(c(rep("Uninoculated", 7), rep("Inoculated", 30)))                   #defines condition since its not in col name
+
+#defining colors
+rowCol <- brewer.pal(50,"Set2")[genes]                         #defines 4 divergent colors for our four genes
+```
+
+    ## Warning in brewer.pal(50, "Set2"): n too large, allowed maximum for palette Set2 is 8
+    ## Returning the palette you asked for with that many colors
+
+``` r
+rowSide <- cbind(Gene = rowCol)                               #using cbind so I can give my annotation a title
+colSide <- brewer.pal(5,"Reds")[time]                         #defines 5 sequential colors for our time points
+colSide2 <- brewer.pal(3,"Set2")[genotype]                    #defines 5 sequential colors for our time points
+#colSide3 <- brewer.pal(2, "Set1")[condition]                 - doesnt add much
+ColSideColors <- cbind(Time=colSide, Genotype=colSide2)       #binds our color column color annotations
+colMain <- colorRampPalette(brewer.pal(9, "Blues"))(68)       #main color
+
+# reorder columns
+custom_col_order <- c("01t00p1Nug", "02t00p2Nug", "03t00p3Nug", "04t00p4Nug", "09t12p1Nug", "10t12p2Nug", "11t12p3Nug", "16t24p1Nug", "17t24p2Nug", "18t24p3Nug", "19t24p4Nug", "24t48p1Nug", "25t48p2Nug", "26t48p3Nug", "27t48p4Nug", "32t72p1Nug", "33t72p2Nug", "34t72p3Nug", "35t72p4Nug", "05t00p1Sym", "06t00p2Sym", "07t00p3Sym", "12t12p1Sym", "13t12p2Sym", "14t12p3Sym", "15t12p4Sym", "20t24p1Sym", "21t24p2Sym", "22t24p3Sym", "23t24p4Sym", "28t48p1Sym", "29t48p2Sym", "30t48p3Sym", "31t48p4Sym", "36t72p1Sym", "37t72p2Sym", "39t72p4Sym")
+
+Condition_effects1_path_rld_matrix2 <- Condition_effects1_path_rld_matrix[, custom_col_order]
+
+#try to see if I can see any patterns by time by turning clustering off and reordering the columns.
+# not seeing a whole lot though.
+
+heatmap(Condition_effects1_path_rld_matrix2,
+         col=colMain,
+         Colv = NA,
+         SideColors=rowSide)
+```
+
+![](uninocvinoc_files/figure-gfm/Other%20pathogenesis%20proteins-1.png)<!-- -->
+
+``` r
+#what if we pull out just symphony or nugget? 
+#nugget looks most promising. 
+
+Condition_effects1_path_rld_matrix_nugget <- Condition_effects1_path_rld_matrix2[,]
+colnames(Condition_effects1_path_rld_matrix2)
+```
+
+    ##  [1] "01t00p1Nug" "02t00p2Nug" "03t00p3Nug" "04t00p4Nug" "09t12p1Nug"
+    ##  [6] "10t12p2Nug" "11t12p3Nug" "16t24p1Nug" "17t24p2Nug" "18t24p3Nug"
+    ## [11] "19t24p4Nug" "24t48p1Nug" "25t48p2Nug" "26t48p3Nug" "27t48p4Nug"
+    ## [16] "32t72p1Nug" "33t72p2Nug" "34t72p3Nug" "35t72p4Nug" "05t00p1Sym"
+    ## [21] "06t00p2Sym" "07t00p3Sym" "12t12p1Sym" "13t12p2Sym" "14t12p3Sym"
+    ## [26] "15t12p4Sym" "20t24p1Sym" "21t24p2Sym" "22t24p3Sym" "23t24p4Sym"
+    ## [31] "28t48p1Sym" "29t48p2Sym" "30t48p3Sym" "31t48p4Sym" "36t72p1Sym"
+    ## [36] "37t72p2Sym" "39t72p4Sym"
+
+``` r
+Condition_effects1_path_rld_matrix2<-Condition_effects1_path_rld_matrix2[,colnames(Condition_effects1_path_rld_matrix2)!= c("05t00p1Sym", "06t00p2Sym", "07t00p3Sym", "12t12p1Sym", "13t12p2Sym", "14t12p3Sym", "15t12p4Sym", "20t24p1Sym", "21t24p2Sym", "22t24p3Sym", "23t24p4Sym", "28t48p1Sym", "29t48p2Sym", "30t48p3Sym", "31t48p4Sym", "36t72p1Sym", "37t72p2Sym", "39t72p4Sym")]
+```
