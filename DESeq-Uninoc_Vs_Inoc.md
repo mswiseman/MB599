@@ -3114,23 +3114,3 @@ heatmap(Condition_effects1_path_rld_matrix2,
 
 ![](images/Other%20pathogenesis%20proteins-1.png)<!-- -->
 
-``` r
-#what if we pull out just symphony or nugget? 
-#nugget looks most promising. 
-
-Condition_effects1_path_rld_matrix_nugget <- Condition_effects1_path_rld_matrix2[,]
-colnames(Condition_effects1_path_rld_matrix2)
-```
-
-    ##  [1] "01t00p1Nug" "02t00p2Nug" "03t00p3Nug" "04t00p4Nug" "09t12p1Nug"
-    ##  [6] "10t12p2Nug" "11t12p3Nug" "16t24p1Nug" "17t24p2Nug" "18t24p3Nug"
-    ## [11] "19t24p4Nug" "24t48p1Nug" "25t48p2Nug" "26t48p3Nug" "27t48p4Nug"
-    ## [16] "32t72p1Nug" "33t72p2Nug" "34t72p3Nug" "35t72p4Nug" "05t00p1Sym"
-    ## [21] "06t00p2Sym" "07t00p3Sym" "12t12p1Sym" "13t12p2Sym" "14t12p3Sym"
-    ## [26] "15t12p4Sym" "20t24p1Sym" "21t24p2Sym" "22t24p3Sym" "23t24p4Sym"
-    ## [31] "28t48p1Sym" "29t48p2Sym" "30t48p3Sym" "31t48p4Sym" "36t72p1Sym"
-    ## [36] "37t72p2Sym" "39t72p4Sym"
-
-``` r
-Condition_effects1_path_rld_matrix2<-Condition_effects1_path_rld_matrix2[,colnames(Condition_effects1_path_rld_matrix2)!= c("05t00p1Sym", "06t00p2Sym", "07t00p3Sym", "12t12p1Sym", "13t12p2Sym", "14t12p3Sym", "15t12p4Sym", "20t24p1Sym", "21t24p2Sym", "22t24p3Sym", "23t24p4Sym", "28t48p1Sym", "29t48p2Sym", "30t48p3Sym", "31t48p4Sym", "36t72p1Sym", "37t72p2Sym", "39t72p4Sym")]
-```
