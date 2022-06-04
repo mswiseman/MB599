@@ -97,6 +97,18 @@ dds <-dds[ rowSums(counts(dds)) > 10, ]
 ```
 
 # Annotations
+``` r
+goTerms_biological <- read_tsv('/Users/michelewiseman/Desktop/goTerms_biologicalProcesses(1).tsv', col_names=FALSE)
+goTerms_cellular <- read_tsv('/Users/michelewiseman/Desktop/goTerms_cellularComponents(1).tsv', col_names=FALSE)
+goTerms_molecular <- read_tsv('/Users/michelewiseman/Desktop/goTerms_molecularFunction(1).tsv', col_names=FALSE)
+kegg_pathway <- read_csv('/Users/michelewiseman/Desktop/kegg_pathway_map.csv', col_names=TRUE)
+
+names(goTerms_biological) <- c('geneID', 'UNIProt_ID', 'GO ID', 'Description', 'Key terms')
+names(goTerms_cellular) <- c('geneID', 'UNIProt_ID', 'GO ID', 'Description', 'Key terms')
+names(goTerms_molecular) <- c('geneID', 'UNIProt_ID', 'GO ID', 'Description', 'Key terms')
+```
+
+## Back to DESeq
 
 ``` r
 #run DESeq... this performs the median of ratios normalization method
@@ -2643,34 +2655,26 @@ r_venn <- ggvenn(vennDat3, set_name_size = 3, text_size =2.5, fill_color = c("#f
 ``` r
 #pathogenesis related genes from Bhardwaj 2011
 pathogenesis_proteins <- read_excel("Downloads/pathogenesis_proteins.xlsx.xlsx")
-```
 
-    ## New names:
-    ## • `Protein names` -> `Protein names...4`
-    ## • `Protein names` -> `Protein names...5`
-
-``` r
 # negative = downregulated in uninoculated; positive = upregulated in uninoculated
-#View(Condition_effects1)
 Condition_effects1_path <- merge(Condition_effects1, pathogenesis_proteins, by.a="UNIProt_ID", by.b="UNIProt_ID", all.x=FALSE, all.y=FALSE)
-#View(Condition_effects1_path)
 
-#subset pathology-related genes
-#with UNIProt ID
+#subset pathology-related genes, with UNIProt ID
 genes_UniProt_Path <- unique(Condition_effects1_path$UNIProt_ID)
 
 #with cascade dovetail ID
 genes_Path <- unique(Condition_effects1_path$geneID)
-#View(genes_Path)
 
+#plotting various differentially expressed genes
 MLO12 <- plotCounts(dds, gene="HUMLU_CAS0068957.t1.p1", intgroup=c("condition", "genotype"), returnData=TRUE)
 
 #top inoc upregulated gene
 NPR1 <- plotCounts(dds, gene="HUMLU_CAS0027044.t1.p1", intgroup=c("condition", "genotype"), returnData=TRUE)
 
-#top differentially expressed (pre/post inoculation) gene that's pathogenesis-related
+#top differentially expressed (pre/post inoculation) gene that's pathogenesis-related.
 RPM1 <- plotCounts(dds, gene="HUMLU_CAS0061636.t1.p1", intgroup=c("condition", "genotype"), returnData=TRUE)
 
+#turns out there were a lot of differentially expressed RPM genes.
 RPM1_ARATH_1<-plotCounts(dds, gene="HUMLU_CAS0060467.t1.p1", intgroup=c("condition", "genotype"), returnData=TRUE)
 RPM1_ARATH_2<-plotCounts(dds, gene="HUMLU_CAS0070361.t1.p1", intgroup=c("condition", "genotype"), returnData=TRUE)
 RPM1_ARATH_3<-plotCounts(dds, gene="HUMLU_CAS0060457.t1.p1", intgroup=c("condition", "genotype"), returnData=TRUE)
@@ -2953,15 +2957,11 @@ RPM1_ARATH_13p
 #load the genes that are present on the 000559. 
 pagit2020_genes <- read_excel("Desktop/pagit2020_genes.xlsx")
 #row.names(pagit2020_genes) <- pagit2020_genes$geneID_desc
-#str(normalized_counts)
-#View(pagit2020_genes)
-
 
 #just the area that was important during QTL mapping
 pagit2020_genes <- pagit2020_genes %>%
   filter(Scaffold=='Scaffold_76')
-#View(pagit2020_genes)
-
+  
 #carry rld_mat from above. add geneID column.
 geneID <- row.names(rld_mat)
 rld_mat_df<-data.frame(rld_mat)
