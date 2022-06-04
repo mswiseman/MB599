@@ -3,14 +3,15 @@ title: "R Notebook"
 output: html_notebook
 ---
 
-```{r}
+# Phyloseq work by Sophie and Riely 
+
+```r
 #create samples_by_metadata for phyloseq
 library(readxl)
 countData_NugSym <- read_excel("C:/Users/sophi/Downloads/NEWVERSION_dovetailAssemblyFullNonRepeatAssociatedGeneList.xlsx", 
                                col_types = c("text", "skip", "skip", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
 
-#View(countData_NugSym)
-#Store GeneID info because the matrix doesnt like it. 
+#store GeneID info because the matrix doesnt like it. 
 GeneID <- countData_NugSym$GeneID
 
 #convert counts to matrix and subtract geneID column. 
@@ -19,7 +20,7 @@ countData2_NugSym <- as.matrix(countData_NugSym[ , -1])
 #check work if you want
 #view(countData2_NugSym)
 
-#add gene IDs back... I knowm it's ridiculous. 
+#add gene IDs back. 
 row.names(countData2_NugSym) <- GeneID   
 
 #will need this later
@@ -43,7 +44,7 @@ samples_by_metadata <- data.frame(Sample, Condition, Cultivar, Time)
 ```
 
 
-```{r}
+```r
 library(DESeq2)
 ## create countData object for deseq analysis and table of sig genes
 countData_NugSym <- read_excel("C:/Users/sophi/Downloads/NEWVERSION_dovetailAssemblyFullNonRepeatAssociatedGeneList.xlsx", 
@@ -89,7 +90,7 @@ nrow(dds_nug_sym2)
 
 ```
 
-```{r}
+```r
 dds <- estimateSizeFactors(dds_nug_sym)
 sizeFactors(dds)
 normalized_counts <- counts(dds, normalized=TRUE)
@@ -102,14 +103,14 @@ deseq2Results
 
 
 
-```{r}
+```r
 gene_counts_by_sample <- read_excel("C:/Users/sophi/Downloads/NEWVERSION_dovetailAssemblyFullNonRepeatAssociatedGeneList.xlsx", 
                                col_types = c("text", "skip", "skip", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric", "numeric"))
 
 gene_counts_by_sample
 ```
 
-```{r}
+```r
 library(phyloseq)
 library(ggplot2)
 theme_set(theme_bw())
@@ -121,7 +122,7 @@ row.names(countData2_NugSym) <- GeneID
 OTU1<-otu_table(countData2_NugSym, taxa_are_rows = TRUE)
 head(OTU1)
 ```
-```{r}
+```r
 tax <- read.csv("C:/Users/sophi/Downloads/doveTail Gene Count With GO Terms.csv", header = TRUE)
 #head(tax)
 
@@ -141,44 +142,44 @@ tax4 <- as.matrix(taxa_df)
 ```
 
 
-```{r}
+```r
 TAX = tax_table(tax4)
 ```
 
-```{r}
+```r
 head(TAX)
 ```
 
 
 
-```{r}
+```r
 #TAX
 class(TAX)
 ```
 
-```{r}
+```r
 physeq = phyloseq(OTU1, TAX)
 ```
 
-```{r}
+```r
 physeq
 ```
 
 
 
-```{r}
+```r
 Sample <- samples_by_metadata$Sample
 samples <- as.matrix(samples_by_metadata[ , -1])
 row.names(samples) <- Sample
 ```
 
-```{r}
+```r
 samples
 ```
 
 
 
-```{r}
+```r
 #starting after youve done DESeq analysis.
 
 # only select significant values
@@ -192,34 +193,34 @@ res.05 <- as.data.frame(res.05)
 res.05 <- tibble::rownames_to_column(res.05, "geneID")
 ```
 
-```{r}
+```r
 head(countData_NugSym)
 ```
-```{r}
+```r
 #head(res.05)
 
 sig_genes <- res.05[1]
 ```
 
-```{r}
+```r
 sig_genes
 ```
-```{r}
+```r
 names(sig_genes)[1] <- "GeneID"
 ```
 
 
 
-```{r}
+```r
 library(dplyr)
 res.05_gene_counts <- left_join(sig_genes, countData_NugSym, by = 'GeneID')
 ```
 
-```{r}
+```r
 tail(res.05_gene_counts)
 ```
 
-```{r}
+```r
 #import molecular function df - you can download this off HopBase if you dont have it
 library(readr)
 
@@ -233,7 +234,7 @@ res.05<-merge(res.05, goTerms_molecular, by.a="geneID", by.b="geneID", all.x=FAL
 res.05_unique <- distinct(res.05, geneID, .keep_all = TRUE)
 ```
 
-```{r}
+```r
 library(tidyr)
 #drop na values
 res.05_unique <- res.05_unique %>% 
@@ -243,16 +244,16 @@ res.05_unique <- res.05_unique %>%
 res.05_subset<- res.05_unique[c("geneID","Key terms","log2FoldChange","padj")]
 ```
 
-```{r}
+```r
 res.05_unique
 ```
-```{r}
+```r
 library("ape")
 random_tree = rtree(ntaxa(physeq), rooted=TRUE, tip.label=taxa_names(physeq))
 plot(random_tree)
 ```
 
-```{r}
+```r
 #format sample data table
 
 sampledata = sample_data(samples_by_metadata)
@@ -265,17 +266,17 @@ sampledata = sample_data_
 ```
 
 
-```{r}
+```r
 #physeq with all 3 tables, no tree
 physeq1 = merge_phyloseq(physeq, sampledata)
 physeq1
 ```
 
-```{r}
+```r
 plot_heatmap(physeq1)
 ```
 
-```{r}
+```r
 library(DESeq2)
 dds <- estimateSizeFactors(dds_nug_sym)
 #sizeFactors(dds)
@@ -283,125 +284,125 @@ normalized_counts <- counts(dds, normalized=TRUE)
 #head(dds)
 ```
 
-```{r}
+```r
 head(normalized_counts)
 ```
-```{r}
+```r
 write.csv(normalized_counts,"C:/Users/sophi/Downloads/normalized_counts1.csv", row.names = TRUE)
 ```
 
-```{r}
+```r
 head(sampledata)
 ```
 
-```{r}
+```r
 ## make new matrix with sig genes and remake phyloseq object
 
 
 ```
 
-```{r}
+```r
 ord_pcoa = ordinate(physeq1, "PCoA", "bray")
 ```
 
-```{r}
+```r
 plot_ordination(physeq1, ord_pcoa, type="taxa")
 ```
 
-```{r}
+```r
 head(TAX)
 ```
 
 
-```{r}
+```r
 plot_ordination(physeq1, ord_pcoa, type="taxa", color="Key.terms.cellular", title = "Cellular Key Terms (All Genes)") + 
   theme(legend.position="none")
 ```
 
-```{r}
+```r
 plot_ordination(physeq1, ord_pcoa, color="Cultivar", title = "Samples (Raw Data)")
 ```
-```{r}
+```r
 plot_ordination(physeq1, ord_pcoa, color="Time", title = "Samples (Raw Data)")
 ```
 
-```{r}
+```r
 # take a look at this function?
 phyloseq_to_deseq2()
 ```
 
 
-```{r}
+```r
 norm_otu = otu_table(normalized_counts, taxa_are_rows = TRUE)
 ```
 
-```{r}
+```r
 head(norm_otu)
 ```
 
-```{r}
+```r
 physeq_norm = phyloseq(norm_otu, TAX, sampledata)
 ```
 
 
-```{r}
+```r
 physeq_norm
 ```
 
-```{r}
+```r
 ord_pcoa_norm = ordinate(physeq_norm, "PCoA", "bray")
 ```
 
-```{r}
+```r
 plot_ordination(physeq_norm, ord_pcoa_norm, type="taxa", color="Key.terms.cellular", title = "Taxa (Normalized Data)") + 
   theme(legend.position="none")
 ```
-```{r}
+```r
 plot_ordination(physeq_norm, ord_pcoa_norm, color="Time", title = "Samples (Normalized Data")
 ```
 
-```{r}
+```r
 plot_ordination(physeq_norm, ord_pcoa_norm, color="Cultivar", title = "Samples (Normalized Data)")
 ```
 
-```{r}
+```r
 wh0 = genefilter_sample(physeq1, filterfun_sample(function(x) x > 5), A=0.5*nsamples(physeq1))
 physeq_pruned = prune_taxa(wh0, physeq1)
 ```
 
-```{r}
+```r
 physeq_pruned
 ```
 
 
-```{r}
+```r
 physeq_pruned = transform_sample_counts(physeq_pruned, function(x) 1E6 * x/sum(x))
 ```
 
-```{r}
+```r
 cellular.sum = tapply(taxa_sums(physeq_pruned), tax_table(physeq_pruned)[, "Key.terms.cellular"], sum, na.rm=TRUE)
 top5cellular = names(sort(cellular.sum, TRUE))[1:5]
 physeq_pruned = prune_taxa((tax_table(physeq_pruned)[, "Key.terms.cellular"] %in% top5cellular), physeq_pruned)
 ```
 
-```{r}
+```r
 physeq_pruned.ord <- ordinate(physeq_pruned, "PCoA", "bray")
 p1 = plot_ordination(physeq_pruned, physeq_pruned.ord, type="taxa", color="Key.terms.cellular", title="Cellular Key Terms (Pruned and Significant Genes Only)")
 print(p1)
 ```
-```{r}
+```r
 plot_ordination(physeq_pruned, physeq_pruned.ord, color="Cultivar", title = "Samples")
 ```
 
-```{r}
+```r
 p1 + facet_wrap(~Key.terms.cellular, 3)
 ```
-```{r}
+```r
 res.05_gene_counts
 ```
 
 
-```{r}
+```r
 # make sig genes table into OTU table 
 
 Gene_ID <- res.05_gene_counts$GeneID
@@ -412,76 +413,76 @@ head(OTU_sig_genes)
 ```
 
 
-```{r}
+```r
 #new phyloseq with significant genes only
 physeq_sig_genes = phyloseq(OTU_sig_genes, TAX, sampledata)
 ```
 
-```{r}
+```r
 physeq_sig_genes
 ```
-```{r}
+```r
 wh1 = genefilter_sample(physeq_sig_genes, filterfun_sample(function(x) x > 5), A=0.5*nsamples(physeq_sig_genes))
 physeq_pruned1 = prune_taxa(wh1, physeq_sig_genes)
 ```
 
-```{r}
+```r
 # pruned and significant genes only
 physeq_pruned1
 ```
 
 
-```{r}
+```r
 cellular.sum1 = tapply(taxa_sums(physeq_pruned1), tax_table(physeq_pruned1)[, "Key.terms.cellular"], sum, na.rm=TRUE)
 top5cellular1 = names(sort(cellular.sum1, TRUE))[1:5]
 physeq_pruned1 = prune_taxa((tax_table(physeq_pruned1)[, "Key.terms.cellular"] %in% top5cellular1), physeq_pruned1)
 ```
 
-```{r}
+```r
 physeq_pruned1.ord <- ordinate(physeq_pruned1, "PCoA", "bray")
 p2 = plot_ordination(physeq_pruned1, physeq_pruned1.ord, type="taxa", color="Key.terms.cellular", title="Cellular Key Terms (Raw Data, Significant Genes Only)")
 print(p2)
 ```
-```{r}
+```r
 p2 + facet_wrap(~Key.terms.cellular, 3)
 ```
 
-```{r}
+```r
 plot_ordination(physeq_pruned1, physeq_pruned1.ord, type="taxa", color="Key.terms.biological", title = "Biological Key Terms (Significant Genes Only)") + 
   theme(legend.position="none")
 ```
 
-```{r}
+```r
 bio.sum1 = tapply(taxa_sums(physeq_pruned1), tax_table(physeq_pruned1)[, "Key.terms.biological"], sum, na.rm=TRUE)
 top5bio1 = names(sort(bio.sum1, TRUE))[1:5]
 physeq_pruned2 = prune_taxa((tax_table(physeq_pruned1)[, "Key.terms.biological"] %in% top5bio1), physeq_pruned1)
 ```
 
-```{r}
+```r
 physeq_pruned2.ord <- ordinate(physeq_pruned2, "PCoA", "bray")
 p3 = plot_ordination(physeq_pruned1, physeq_pruned2.ord, type="taxa", color="Key.terms.biological", title="Biological Key Terms (Significant Genes Only)")
 print(p3)
 ```
 
-```{r}
+```r
 library(ggplot2)
 ```
 
-```{r}
+```r
 data("midwest", package = "ggplot2")
 options(scipen=999)
 ```
-```{r}
+```r
 dim(midwest)
 ```
 
-```{r}
+```r
 ggplot(midwest, aes(x=area, y=poptotal)) + 
   geom_point() +
   geom_smooth(method="lm")
 ```
 
-```{r}
+```r
 ggplot(midwest, aes(x=area, y=poptotal)) + 
   geom_point(col="steelblue", size=2) +   # Set static color and size for points
   geom_smooth(method="lm", col="firebrick") +  # change the color of line
@@ -489,14 +490,14 @@ ggplot(midwest, aes(x=area, y=poptotal)) +
   labs(title="Area Vs Population", subtitle="From midwest dataset", y="Population", x="Area", caption="Midwest Demographics")
 ```
 
-```{r}
+```r
 ggplot(midwest, aes(x=area, y=poptotal)) + 
   geom_point(aes(col=state), size=3) +  # Set color to vary based on state categories.
   geom_smooth(method="lm", col="firebrick", size=2) + 
   coord_cartesian(xlim=c(0, 0.1), ylim=c(0, 1000000)) + 
   labs(title="Area Vs Population", subtitle="From midwest dataset", y="Population", x="Area", caption="Midwest Demographics")
 ```
-```{r}
+```r
 ggplot(data=countData_NugSym, aes(x = GeneID, y=01t00p1Nug)) + 
   geom_point()
 ```
