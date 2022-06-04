@@ -213,12 +213,14 @@ names(sig_genes)[1] <- "GeneID"
 
 ```r
 library(dplyr)
-res.05_gene_counts <- left_join(sig_genes, countData_NugSym, by = 'GeneID')
+res.05_gene_counts <- left_join(sig_genes, countData_NugSym, by = 'GeneID') 
 ```
 
 ```r
 tail(res.05_gene_counts)
 ```
+
+[HopBase annotation data](http://hopbase.cqls.oregonstate.edu/dovetailDownloads/dovetailCascadeMasked.php)
 
 ```r
 #import molecular function df - you can download this off HopBase if you dont have it
@@ -273,6 +275,7 @@ physeq1
 ```
 
 ```r
+#plot a quick heatmap to visualize the data
 plot_heatmap(physeq1)
 ```
 
@@ -285,21 +288,12 @@ normalized_counts <- counts(dds, normalized=TRUE)
 ```
 
 ```r
-head(normalized_counts)
-```
-```r
+#write normalized_counts for use in the future
 write.csv(normalized_counts,"C:/Users/sophi/Downloads/normalized_counts1.csv", row.names = TRUE)
 ```
 
-```r
-head(sampledata)
-```
+## Make new matrix with sig genes and remake phyloseq object
 
-```r
-## make new matrix with sig genes and remake phyloseq object
-
-
-```
 
 ```r
 ord_pcoa = ordinate(physeq1, "PCoA", "bray")
