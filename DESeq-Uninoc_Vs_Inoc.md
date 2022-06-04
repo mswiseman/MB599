@@ -2431,10 +2431,9 @@ resSig<-resSig %>%
 write.csv(resSig, "resSig.csv")
 ```
 
-[Genes upregulated in Nugget as compared to
-Symphony](https://biit.cs.ut.ee/gplink/l/aNUtJlb0Ts) [Genes
-downregulated in Nugget as compared to
-Symphony](https://biit.cs.ut.ee/gplink/l/uPNRUSYIQq)
+[Genes upregulated in Nugget as compared to Symphony](https://biit.cs.ut.ee/gplink/l/aNUtJlb0Ts) 
+
+[Genes downregulated in Nugget as compared to Symphony](https://biit.cs.ut.ee/gplink/l/uPNRUSYIQq)
 
 ``` r
 #for Condition
