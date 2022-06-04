@@ -1,9 +1,9 @@
 ---
-title: "R Notebook"
-output: html_notebook
+title: "Phyloseq work"
+authors: "Riely White and Sophie Baur"
+date: June 2022
 ---
 
-# Phyloseq work by Sophie and Riely 
 
 ```r
 #create samples_by_metadata for phyloseq
