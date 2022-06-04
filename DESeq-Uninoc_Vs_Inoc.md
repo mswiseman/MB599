@@ -36,9 +36,7 @@ library(kableExtra)
 library(gage)
 ```
 
-Since the time points seem to cluster closely, it might be more
-informative to look just at uninoculated/inoculated. So, I made a new
-dds object to examine just that.
+Since the time points seem to cluster closely, it might be more informative to look just at uninoculated/inoculated. So, I made a new dds object to examine just that.
 
 ``` r
 #load count data into R. We have to skipa annotation columns for now since this needs to be a matrix.
@@ -66,13 +64,13 @@ head(countData_NugSym)
     ## #   `24t48p1Nug` <dbl>, `25t48p2Nug` <dbl>, `26t48p3Nug` <dbl>, …
 
 ``` r
-#Store GeneID info because the matrix doesnt like it. 
+#store GeneID info because the matrix doesnt like it. 
 GeneID <- countData_NugSym$GeneID
 
 #convert counts to matrix and subtract geneID column. 
 countData2_NugSym_mtx <- as.matrix(countData_NugSym[ , -1])
 
-#add gene IDs back... I knowm it's ridiculous. 
+#add gene IDs back 
 row.names(countData2_NugSym_mtx) <- GeneID  
 ```
 
@@ -87,11 +85,7 @@ colData = data.frame(col.names = c("01t00p1Nug","02t00p2Nug","03t00p3Nug","04t00
 
 #create DESEQ2 object genotype and condition plus their interaction
 dds <- DESeqDataSetFromMatrix(countData = countData2_NugSym_mtx, colData = colData, ~ genotype + condition + genotype:condition)
-```
 
-    ## converting counts to integer mode
-
-``` r
 #delete rows with less than 10 reads
 dds <-dds[ rowSums(counts(dds)) > 10, ]
 ```
