@@ -2540,6 +2540,7 @@ heatmap.2(mat, trace = "none", col = rev(hmcol), margin = c(13,13))
 #do we see a difference with the vst-transformed data?
 heatmap.2(mat_vst, trace = "none", col = rev(hmcol), margin = c(13,13))
 ```
+As with our other DEseq object, we don't see much of a difference between the two.
 
 ![](images/quick%20heat%20map-2.png)<!-- -->
 
@@ -2575,9 +2576,9 @@ pheatmap(vst_cor, border_color=NA, fontsize = 10,
 fviz_eig(pca) 
 ```
 
-![](images/scree%20plot-1.png)<!-- --> # Venn
-diagram
+![](images/scree%20plot-1.png)<!-- --> 
 
+# Venn diagram
 ``` r
 #double check the names to make sure we get our contrasts right
 resultsNames(dds)
@@ -2631,8 +2632,6 @@ vennDat2 <-tibble(geneID=rownames(results.condition)) %>%
   mutate('Upregulated Symphony' = results.genotype.symvnug$padj < 0.05 & !is.na(results.genotype.symvnug$padj) & results.genotype.symvnug$log2FoldChange > 0) %>% 
   mutate('Upregulated Inocuated' = results.condition$padj < 0.05 & !is.na(results.condition$padj) & results.condition$log2FoldChange < 0) 
 
-#View(vennDat2)
-
 sus_venn <- ggvenn(vennDat2, set_name_size = 3, text_size = 2.5, fill_color = c("#87cb28", "#7d7bc8"))
 
 #R genes? By using '<' for results.genotype.symvnug, I'm looking at upregulated nugget genes. 
@@ -2642,9 +2641,12 @@ vennDat3 <-tibble(geneID=rownames(results.condition)) %>%
 
 r_venn <- ggvenn(vennDat3, set_name_size = 3, text_size =2.5, fill_color = c("#ffeb99", "#7d7bc8"))
 
-#sus_venn + r_venn
+sus_venn + r_venn    #print both of them combined
 ```
 ![sus_venn_r_venn.png](images/sus_venn_r_venn.png)
+
+# Now I wanted to take a candidate gene approach. 
+Do we see an up-regulation of any known pathogenesis-related genes? I did this using two data sets, one from [Padgit-Cobb et al 2020](https://link.springer.com/article/10.1007/s10681-019-2543-x) and the other from [Bhardwaj et al. 2011](https://journals.plos.org/plosone/article?id=10.1371/journal.pone.0026968). 
 
 ``` r
 #pathogenesis related genes from Bhardwaj 2011
@@ -2945,12 +2947,11 @@ RPM1_ARATH_13p
 
 # Look at Padgitt-Cobb data
 
-``` r
-#I manually blasted the genes listed the genes found on contig 000559 listed in the Pagit-Cobb paper to ascertain what the associated genes are in the new Dovetail genome. Then, I made a list of these genes in pagit2020_genes.
+I manually blasted the genes listed the genes found on contig 000559 listed in the Pagit-Cobb paper to ascertain what the associated genes are in the new Dovetail genome. Then, I made a list of these genes in pagit2020_genes.
 
+``` r
 #load the genes that are present on the 000559. 
 pagit2020_genes <- read_excel("Desktop/pagit2020_genes.xlsx")
-#row.names(pagit2020_genes) <- pagit2020_genes$geneID_desc
 
 #just the area that was important during QTL mapping
 pagit2020_genes <- pagit2020_genes %>%
@@ -3005,9 +3006,9 @@ heatmap3(pagit2020_counts_rld_matrix,
          )
 ```
 
-![](images/Padgitt%20Cobb%20Data-1.png)<!-- --> It
-looks like there are 24 up-regulated genes in Nugget that are likely
-R-related genes near the QTL locus of interest.
+![](images/Padgitt%20Cobb%20Data-1.png)<!-- --> 
+
+It looks like there are 24 up-regulated genes in Nugget that are likely R-related genes near the QTL locus of interest.
 
 ``` r
 #24 significantly upregulated R-like genes that are found on the correct chromosome
@@ -3045,7 +3046,9 @@ ggplot(R_genes, aes(x=Gene, fill=Gene)) +
     text = element_text(face = "bold")
   )
 ```
+
 ![](images/putative%20R%20genes-1.png)<!-- -->
+
 
 ``` r
 #pathogenesis related genes from Bhardwaj 2011
