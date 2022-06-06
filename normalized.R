@@ -1,3 +1,5 @@
+#normalized data and phyloseq object Riely used for the PCoA plots and randomforest.
+
 library(PCAtools)
 install.packages('PCAtools')
 library(genefilter)
